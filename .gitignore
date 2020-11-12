@@ -1,11 +1,8 @@
-*private.py
 predictionserver/private/*
-tmp_*.json
-*x.py
-tests/tmp*
+.idea/*
 tests/__pycache*
-predictionserver.egg-info
-predictionserver/__pycache__
-build
-dist
+.pytest_cache
+build/
+dist/
+dist/
 __pycache__

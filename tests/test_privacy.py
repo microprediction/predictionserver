@@ -1,5 +1,4 @@
 import pytest
-import os
 from predictionserver.devtools.whereami import devlocation
 
 
