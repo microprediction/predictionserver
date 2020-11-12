@@ -1,0 +1,11 @@
+*private.py
+predictionserver/private/*
+tmp_*.json
+*x.py
+tests/tmp*
+tests/__pycache*
+predictionserver.egg-info
+predictionserver/__pycache__
+build
+dist
+__pycache__
