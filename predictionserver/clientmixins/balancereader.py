@@ -12,6 +12,6 @@ class BalanceReader(KeyConventions,BaseReader):
 
 
 if __name__ == '__main__':
-    from predictionserver.collider_config_private import ALBAHACA_MOLE
+    from predictionserver.private.collider_config_private import ALBAHACA_MOLE
     client = BalanceReader()
     print(client.get_balance(write_key=ALBAHACA_MOLE))

@@ -1,7 +1,5 @@
-from predictionserver.futureconventions.attributeconventions import AttributeConventions, AttributeType, \
-    AttributeGranularity
+from predictionserver.futureconventions.attributeconventions import AttributeType, AttributeGranularity
 from predictionserver.clientmixins.basereader import BaseReader
-from predictionserver.conventions import Conventions
 from typing import Union
 
 

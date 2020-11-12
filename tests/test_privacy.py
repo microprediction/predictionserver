@@ -1,6 +1,8 @@
 import pytest
 from predictionserver.devtools.whereami import devlocation
 
+# A little check on .gitignore
+
 
 def test_privacy():
     if devlocation()=='github':

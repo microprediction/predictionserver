@@ -10,7 +10,7 @@ PUBLIC_PROFILE = {AttributeType.homepage: 'https://www.savetrumble.com.au',
                   AttributeType.repository: 'https://pypi.org/project/microfilter/',
                   AttributeType.paper: 'https://arxiv.org/pdf/1512.01389.pdf',
                   AttributeType.topic: 'AutoMl',
-                  AttributeType.description: 'Hearding cattle using AutoMl'}
+                  AttributeType.description: 'Herding cattle using AutoMl'}
 
 PRIVATE_PROFILE = {AttributeType.email: 'info@savetrundle.nsw.com.au',
                    AttributeType.description: 'private description'}

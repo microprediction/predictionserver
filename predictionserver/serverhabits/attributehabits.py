@@ -11,6 +11,7 @@ from typing import Union
 # attribute::email::write_key           'lkajsf124124jlk'      bob@bill.com     (privately held email)
 # attribute::homepage::code             'f10a7ab1eca7'         https://blah     (public homepage link)
 
+
 def attribute_docstring(granularity: AttributeGranularity):
     """ Decorator that standardized the doc strings for API """
 
