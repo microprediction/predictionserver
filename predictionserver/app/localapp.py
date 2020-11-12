@@ -1,4 +1,6 @@
 # For testing
+# This is used by conftest.py to set up a local server at the outset of testing
+
 import multiprocessing
 import time
 from urllib.request import urlopen

@@ -1,6 +1,6 @@
 from flask import Flask
 from flask_restx import Api
-from predictionserver.app.attributeapp import add_attribute_namespaces
+from predictionserver.app.attributeapp_autogen import add_attribute_namespaces
 
 
 def test_attribute_namespaces():

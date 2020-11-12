@@ -15,7 +15,7 @@ class AttributeReader(BaseReader):
         """
         granularity = AttributeGranularity[str(granularity)] if granularity else self.attribute_granularity_inference(
             **kwargs)
-        kwargs.update({"granularity":granularity})
+        kwargs.update({"granularity":str(granularity)})
         return self.request_get_json(method='attribute', arg=str(attribute_type), data=kwargs)
 
     # ----------------------------------------------- #

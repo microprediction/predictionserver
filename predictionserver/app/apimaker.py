@@ -41,7 +41,6 @@ def make_api_call(api_obj:object, api_method:ApiMethod, parser:RequestParser=Non
 
 def restx_class_maker(api_obj, docstring:str, api_methods ):
     """ Generates a application friendly class with autogen docstring """
-    # TODO: Autogenerate an OPTIONS method
 
     api_name = api_name_from_obj(api_obj)
     cls_methods = {}
@@ -67,6 +66,7 @@ def restx_class_maker(api_obj, docstring:str, api_methods ):
 
 
 def make_parser(obj, api_method: ApiMethod):
+    """ Inspect object, infer which method is get, put or whatever, and create parser """
     method = select_api_method(api_obj=obj, api_method=api_method)
     full_spec = inspect.getfullargspec(method[1])
     parser = reqparse.RequestParser()

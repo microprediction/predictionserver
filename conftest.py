@@ -1,5 +1,5 @@
 import pytest
-from predictionserver.app.attributeapp import create_attribute_app
+from predictionserver.app.attributeapp_autogen import create_attribute_app
 from predictionserver.app.localapp import create_local_app_process, kill_local_app_process
 
 

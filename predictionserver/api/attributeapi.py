@@ -2,6 +2,23 @@ from predictionserver.servermixins.attributeserver import AttributeServer
 from predictionserver.futureconventions.attributeconventions import AttributeGranularity
 
 
+class AttributeApi(AttributeServer):
+
+    def __init__(self,**kwargs):
+        super().__init__(**kwargs)
+
+    def api_attribute_get(self, attribute_type:str,
+                      granularity: str, code: str = None,
+                      write_key: str = None,
+                      name: str = None, delay: int = None,
+                      genus: str = None):
+        return self.get_attribute(attribute_type=attribute_type,
+                      granularity=granularity, code=code, write_key=write_key, name=name, delay=delay, genus=genus)
+
+    def api_owner_public_attribute_patch(self):
+        return "hello world"
+
+
 class OwnerPublicAttributeApi(AttributeServer):
 
     def __init__(self,**kwargs):
