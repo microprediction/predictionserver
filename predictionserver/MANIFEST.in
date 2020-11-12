@@ -1,0 +1,6 @@
+include README.md
+include docs/CLIENT_TOPOLOGY.md
+include docs/SERVER_TOPOLOGY.md
+include
+global-exclude *_private.py
+
