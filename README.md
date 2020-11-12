@@ -1,2 +1,3 @@
 # predictionserver
-Development version of microprediction server (not working yet)
+
+Successor to rediz (not working yet)
