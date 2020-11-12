@@ -15,7 +15,25 @@ class AttributeApi(AttributeServer):
         return self.get_attribute(attribute_type=attribute_type,
                       granularity=granularity, code=code, write_key=write_key, name=name, delay=delay, genus=genus)
 
-    def api_owner_public_attribute_patch(self):
+    def api_attribute_put(self, attribute_type: str, value:str,
+                          granularity: str, code: str = None,
+                          write_key: str = None,
+                          name: str = None, delay: int = None,
+                          genus: str = None):
+        return self.set_attribute(attribute_type=attribute_type,
+                                  granularity=granularity, code=code, write_key=write_key, name=name, delay=delay,
+                                  genus=genus, value=value)
+
+    def api_attribute_delete(self, attribute_type: str,
+                          granularity: str, code: str = None,
+                          write_key: str = None,
+                          name: str = None, delay: int = None,
+                          genus: str = None):
+        return self.delete_attribute(attribute_type=attribute_type,
+                                  granularity=granularity, code=code, write_key=write_key, name=name, delay=delay,
+                                  genus=genus)
+
+    def api_attribute_patch(self):
         return "hello world"
 
 

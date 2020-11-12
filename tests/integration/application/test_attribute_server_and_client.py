@@ -22,14 +22,11 @@ def test_attribute_server(localhost_process):
     server = AttributeServer()
     server.connect(**MICRO_TEST_CONFIG)
     email = 'babloh@cattle.com'
-    server.set_attribute(attribute_type=AttributeType.email,granularity=AttributeGranularity.write_key,
-                         write_key=BABLOH_CATTLE,value=email)
-    email_back = server.get_attribute(attribute_type=AttributeType.email,granularity=AttributeGranularity.write_key, write_key=BABLOH_CATTLE)
-    assert email==email_back
-    email_back_from_client = ar.get_attribute(attribute_type=AttributeType.email, granularity=AttributeGranularity.write_key, write_key=BABLOH_CATTLE)
-    assert email==email_back_from_client
-
-
-
-
-
+    server.set_attribute(attribute_type=AttributeType.email, granularity=AttributeGranularity.write_key,
+                         write_key=BABLOH_CATTLE, value=email)
+    email_back = server.get_attribute(attribute_type=AttributeType.email, granularity=AttributeGranularity.write_key,
+                                      write_key=BABLOH_CATTLE)
+    assert email == email_back
+    email_back_from_client = ar.get_attribute(attribute_type=AttributeType.email,
+                                              granularity=AttributeGranularity.write_key, write_key=BABLOH_CATTLE)
+    assert email == email_back_from_client

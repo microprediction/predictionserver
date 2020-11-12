@@ -21,7 +21,7 @@ def add_attribute_namespaces(api: Api):
     api_methods = [ApiMethod.get, ApiMethod.put, ApiMethod.delete, ApiMethod.patch]
     objs = [OwnerPrivateAttributeApi(), OwnerPublicAttributeApi(), StreamAttributeApi(), AttributeApi()]
     granularities = [AttributeGranularity.write_key, AttributeGranularity.code, AttributeGranularity.name ]
-    docstrings = [ATTRIBUTE_GRANULARITY_EXPLANATIONS[granularity] for granularity in granularities ]
+    docstrings = [ATTRIBUTE_GRANULARITY_EXPLANATIONS[granularity] for granularity in granularities ] + [' any attribute ']
     api_classes = [ restx_class_maker(api_obj=obj, docstring=docstring, api_methods=api_methods)
                     for obj, docstring in zip(objs, docstrings) ]
 
