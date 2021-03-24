@@ -1,5 +1,6 @@
-from predictionserver.futureconventions.typeconventions import GranularityEnum, StrEnum
-from pprint import pprint
+from predictionserver.futureconventions.typeconventions import (
+    GranularityEnum, StrEnum
+)
 
 # Listing of attributes and granularities that would typically be relevant...
 
@@ -27,44 +28,62 @@ class AttributeGranularity(GranularityEnum):
     code_and_genus = 4               # Prize descriptions
 
 
-LIKELY_ATTRIBUTES = {AttributeGranularity.code:[AttributeType.repository,
-                                                AttributeType.handle,
-                                                AttributeType.description,
-                                                AttributeType.homepage,
-                                                AttributeType.team,
-                                                AttributeType.article],
-                     AttributeGranularity.write_key:[AttributeType.email],
-                     AttributeGranularity.name:[AttributeType.repository,
-                                                AttributeType.description,
-                                                AttributeType.homepage,
-                                                AttributeType.article,
-                                                AttributeType.topic]}
+LIKELY_ATTRIBUTES = {
+    AttributeGranularity.code: [
+        AttributeType.repository,
+        AttributeType.handle,
+        AttributeType.description,
+        AttributeType.homepage,
+        AttributeType.team,
+        AttributeType.article,
+    ],
+    AttributeGranularity.write_key: [
+        AttributeType.email
+    ],
+    AttributeGranularity.name: [
+        AttributeType.repository,
+        AttributeType.description,
+        AttributeType.homepage,
+        AttributeType.article,
+        AttributeType.topic,
+    ],
+}
 
-def _phrase(attributes:list):
-    if len(attributes)==1:
+
+def _phrase(attributes: list):
+    if len(attributes) == 1:
         return str(attributes[0])
     else:
-        return ', '.join([str(att) for att in attributes[:-1]]) + ' or ' + str(attributes[-1])
+        return ', '.join([str(att) for att in attributes[:-1]]) + ' or ' + \
+               str(attributes[-1])
 
 
-ATTRIBUTE_GRANULARITY_EXPLANATIONS = {AttributeGranularity.code: 'public owner attribute such as ' +
-                                                         _phrase(LIKELY_ATTRIBUTES[AttributeGranularity.code]),
-                                      AttributeGranularity.write_key:'private owner attribute such as ' +
-                                                         _phrase(LIKELY_ATTRIBUTES[AttributeGranularity.write_key]),
-                                      AttributeGranularity.name:'public stream attribute such as ' +
-                                                         _phrase(LIKELY_ATTRIBUTES[AttributeGranularity.name])
-                                      }
-
-
+ATTRIBUTE_GRANULARITY_EXPLANATIONS = {
+    AttributeGranularity.code: 'public owner attribute such as ' + _phrase(
+        LIKELY_ATTRIBUTES[AttributeGranularity.code]
+    ),
+    AttributeGranularity.write_key: 'private owner attribute such as ' + _phrase(
+        LIKELY_ATTRIBUTES[AttributeGranularity.write_key]
+    ),
+    AttributeGranularity.name: 'public stream attribute such as ' + _phrase(
+        LIKELY_ATTRIBUTES[AttributeGranularity.name]
+    ),
+}
 
 
 class AttributeConventions:
 
-    def __init__(self,**kwargs):
+    def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
     @staticmethod
-    def attribute_granularity_inference(code=None, write_key=None, name=None, delay=None, genus=None):
+    def attribute_granularity_inference(
+            code=None,
+            write_key=None,
+            name=None,
+            delay=None,
+            genus=None
+    ):
         """ This is here so the user doesn't need to pass granularity, though
             it is recommended that one does anyway.
         """
@@ -79,6 +98,7 @@ class AttributeConventions:
         elif write_key is not None:
             return AttributeGranularity.write_key
         else:
-            raise TypeError('Attribute granularity cannot be inferred. Suggest supplying granularity explicitly.')
-
-
+            raise TypeError(
+                'Attribute granularity cannot be inferred. '
+                'Suggest supplying granularity explicitly.'
+            )

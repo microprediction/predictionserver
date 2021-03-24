@@ -1,5 +1,7 @@
 from predictionserver.futureconventions.sepconventions import SepConventions
-from predictionserver.futureconventions.typeconventions import GranularityEnum, StrEnum
+from predictionserver.futureconventions.typeconventions import (
+    GranularityEnum, StrEnum
+)
 from typing import Union
 
 # Metrics are system incremented floats stored in hashes that track basic

@@ -5,17 +5,19 @@ from predictionserver.api.attributeapi import OwnerPrivateAttributeApi
 from functools import partial
 from flask_restx.reqparse import RequestParser
 from predictionserver.futureconventions.apiconventions import api_name_from_obj
-from predictionserver.serverhabits.attributehabits import attribute_docstring, AttributeGranularity
-import functools
 
 # Generate flask-application classes from classes in predictionserver/api
 
 
-def generic_init(self,**kwargs):
+def generic_init(self, **kwargs):
     super().__init__(**kwargs)
 
 
-def generic_api_method(parser=None,api_obj_method=None,content=None):
+def generic_api_method(
+        parser=None,
+        api_obj_method=None,
+        content=None
+):
     if parser is not None:
         kwargs = parser.parse_args()
         return api_obj_method(**kwargs)
@@ -26,43 +28,58 @@ def generic_api_method(parser=None,api_obj_method=None,content=None):
 
 
 def make_options_api_call(content):
-    return partial(generic_api_method, parser=None,api_obj_method=None,content=content)
+    return partial(
+        generic_api_method,
+        parser=None,
+        api_obj_method=None,
+        content=content,
+    )
 
 
-def make_api_call(api_obj:object, api_method:ApiMethod, parser:RequestParser=None):
+def make_api_call(
+        api_obj: object,
+        api_method: ApiMethod,
+        parser: RequestParser = None,
+):
     """ Template
     :param api_obj:        An api server subclass implementing  api_blah_blah_get( )
     :return:               class that can be interpreted by application
     """
     api_obj_method = select_api_method(api_obj=api_obj, api_method=api_method)[1]
-    mthd = partial(generic_api_method,parser=parser,api_obj_method=api_obj_method)
-    return mthd
+    return partial(generic_api_method, parser=parser, api_obj_method=api_obj_method)
 
 
-def restx_class_maker(api_obj, docstring:str, api_methods ):
+def restx_class_maker(api_obj, docstring: str, api_methods):
     """ Generates a application friendly class with autogen docstring """
 
     api_name = api_name_from_obj(api_obj)
     cls_methods = {}
     options_response = {}
     for api_method in api_methods:
-        parser = make_parser(api_obj,api_method=api_method)
-        api_call = make_api_call(api_obj=api_obj,parser=parser, api_method=api_method)
+        parser = make_parser(api_obj, api_method=api_method)
+        api_call = make_api_call(
+            api_obj=api_obj,
+            api_method=api_method,
+            parser=parser,
+        )
         if parser is not None:
-            payload_example = '{'+ ', '.join([ arg.name+':whatever' for arg in parser.args ])+'}'
+            payload_example = '{' + \
+                              ', '.join([f'{arg.name}:whatever' for arg in parser.args]) + \
+                              '}'
         lower_case_method = str(api_method)
-        api_call.__doc__ = lower_case_method[0].upper() + lower_case_method[1:] +\
-                           ' '+ docstring
+        api_call.__doc__ = f'{lower_case_method.capitalize()} {docstring}. '
         options_response[str(api_method)] = {'description': api_call.__doc__}
         if parser is not None:
-            api_call.__doc__ += '. Example payload '+payload_example
-            options_response[str(api_method)].update({'parameters':[arg.name for arg in parser.args]})
-        cls_methods.update({str(api_method):api_call})
+            api_call.__doc__ += 'Example payload: ' + payload_example
+            options_response[str(api_method)].update(
+                {'parameters': [arg.name for arg in parser.args]}
+            )
+        cls_methods.update({str(api_method): api_call})
     # Add options api to explain them all
     options_api_call = make_options_api_call(content=options_response)
     options_api_call.__doc__ = 'Listing of methods and arguments to supply'
-    cls_methods.update({'options':options_api_call})
-    return type(api_name,(Resource,),cls_methods)
+    cls_methods.update({'options': options_api_call})
+    return type(api_name, (Resource,), cls_methods)
 
 
 def make_parser(obj, api_method: ApiMethod):
@@ -82,7 +99,7 @@ def make_parser(obj, api_method: ApiMethod):
         return None  # Don't want a parser
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     obj = OwnerPrivateAttributeApi()
-    parser = make_parser(obj=obj,api_method=ApiMethod.get)
+    parser = make_parser(obj=obj, api_method=ApiMethod.get)
     pass

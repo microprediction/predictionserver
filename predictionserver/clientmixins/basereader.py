@@ -32,8 +32,6 @@ class BaseReader(AutoConfigure):
         return res
 
 
-
-
-if __name__=='__main__':
+if __name__ == '__main__':
     reader = BaseReader()
-    print(reader.request_get_json(method='live',arg='cop.json'))
+    print(reader.request_get_json(method='live', arg='cop.json'))
