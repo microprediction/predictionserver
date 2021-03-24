@@ -25,11 +25,15 @@ class GranularityEnum(StrEnum):
         return self.__str__().split('_and_')
 
     def instance_name(self, **kwargs):
-        non_none_kwargs = dict([(k,v) for k,v in kwargs.items() if v is not None])
+        non_none_kwargs = dict([(k, v) for k, v in kwargs.items() if v is not None])
         try:
-            return SepConventions.pipe().join( [ str(non_none_kwargs[k]) for k in self.split() ])
+            return SepConventions.pipe().join(
+                [str(non_none_kwargs[k]) for k in self.split()])
         except KeyError:
-            raise TypeError('Cannot render instance name for granularity (missing kwarg like code, write_key, name etc)')
+            raise TypeError(
+                'Cannot render instance name for granularity (missing kwarg like '
+                'code, write_key, name etc)'
+            )
 
 
 class Memory(StrEnum):
@@ -46,7 +50,10 @@ class Genus(StrEnum):
 
     @staticmethod
     def from_name(name):
-        return Genus.trivariate if 'z3~' in name else Genus.bivariate if 'z2~' in name else Genus.zscore if 'z1~' in name else Genus.regular
+        return Genus.trivariate if 'z3~' in name else \
+            Genus.bivariate if 'z2~' in name else \
+            Genus.zscore if 'z1~' in name else \
+            Genus.regular
 
 
 class Family(StrEnum):
@@ -54,7 +61,3 @@ class Family(StrEnum):
     delay = 1
     genus = 2
     sponsor = 3
-
-
-
-

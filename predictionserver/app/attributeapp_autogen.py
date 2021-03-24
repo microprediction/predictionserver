@@ -33,8 +33,8 @@ def add_attribute_namespaces(api: Api):
         AttributeGranularity.name,
     ]
     docstrings = (
-            [ATTRIBUTE_GRANULARITY_EXPLANATIONS[g] for g in granularities] +
-            [' any attribute ']
+        [ATTRIBUTE_GRANULARITY_EXPLANATIONS[g] for g in granularities] +
+        [' any attribute ']
     )
     api_classes = [
         restx_class_maker(api_obj=obj, docstring=docstring, api_methods=api_methods)

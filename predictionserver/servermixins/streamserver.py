@@ -7,10 +7,6 @@ class StreamServer(LaggedServer, ScenarioServer):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-
-
-
-
     def get_budget(self, name):
         return self.client.hget(name=self.BUDGETS, key=name)
 
@@ -22,9 +18,6 @@ class StreamServer(LaggedServer, ScenarioServer):
     def get_budgets(self):
         return self._descending_values(self.client.hgetall(name=self.BUDGETS))
 
-
-
-
     # --------------------------------------------------------------------------
     #            Public interface  (set/delete streams)
     # --------------------------------------------------------------------------
@@ -32,9 +25,13 @@ class StreamServer(LaggedServer, ScenarioServer):
     def mtouch(self, names, write_key, operation='mtouch'):
         if self.permitted_to_mset(write_key=write_key):
             budgets = [self.maximum_stream_budget(write_key=write_key) for _ in names]
-            return self._mtouch_implementation(names=names, write_key=write_key, budgets=budgets)
+            return self._mtouch_implementation(
+                names=names, write_key=write_key, budgets=budgets)
         else:
-            error_data = {'operation': operation, 'message': 'Not permitted with write_key supplied', 'success': False}
+            error_data = {
+                'operation': operation,
+                'message': 'Not permitted with write_key supplied',
+                'success': False}
             self._error(write_key=write_key, data=error_data)
             return error_data
 
@@ -52,8 +49,13 @@ class StreamServer(LaggedServer, ScenarioServer):
             return False
         else:
             budget = min(self.maximum_stream_budget(write_key=write_key), budget)
-            return self._mset_implementation(name=name, value=value, write_key=write_key, return_args=None,
-                                             budget=budget, with_percentiles=True)
+            return self._mset_implementation(
+                name=name,
+                value=value,
+                write_key=write_key,
+                return_args=None,
+                budget=budget,
+                with_percentiles=True)
 
     def cset(self, names: NameList, values: ValueList, write_key: str, budget: float = 1.0):
         if not self.permitted_to_cset(write_key=write_key):
@@ -64,7 +66,12 @@ class StreamServer(LaggedServer, ScenarioServer):
         else:
             budget = min(budget, self.maximum_stream_budget(write_key=write_key))
             budgets = [budget / len(names) for _ in names]
-            return self._mset(names=names, values=values, budgets=budgets, write_key=write_key, with_copulas=True)
+            return self._mset(
+                names=names,
+                values=values,
+                budgets=budgets,
+                write_key=write_key,
+                with_copulas=True)
 
     def mset(self, names: NameList, values: ValueList, write_key: str, budget: float = 1.0):
         if not self.permitted_to_mset(write_key=write_key) or len(names) > 10:
@@ -74,49 +81,79 @@ class StreamServer(LaggedServer, ScenarioServer):
         else:
             budget = min(budget, self.maximum_stream_budget(write_key=write_key))
             budgets = [budget / len(names) for _ in names]
-            return self._mset(names=names, values=values, budgets=budgets, write_key=write_key, with_copulas=False)
+            return self._mset(
+                names=names,
+                values=values,
+                budgets=budgets,
+                write_key=write_key,
+                with_copulas=False)
 
-    def _mset(self, names: NameList, values: ValueList, budgets: List[float], write_key=None, write_keys=None,
-              with_copulas=False):
+    def _mset(
+            self,
+            names: NameList,
+            values: ValueList,
+            budgets: List[float],
+            write_key=None,
+            write_keys=None,
+            with_copulas=False):
         """ Apply set() for multiple names and values, with copula derived streams optionally """  # Todo: disallow calling with multiple write_keys
         is_plain = [MicroServerConventions.is_plain_name(name) for name in names]
         if not len(names) == len(values):
-            error_data = {'names': names, 'values': values, 'message': 'Names and values have different lengths'}
+            error_data = {'names': names, 'values': values,
+                          'message': 'Names and values have different lengths'}
             self._error(write_key=write_key, data=error_data)
             raise Exception(json.dumps(error_data))
         if not all(is_plain):
             culprits = [n for n, isp in zip(names, is_plain) if not (isp)]
-            error_data = {'culprits': culprits,
-                          'error': 'One or more names are not considered plain names. See MicroConvention.is_plain_name '}
+            error_data = {
+                'culprits': culprits,
+                'error': 'One or more names are not considered plain names. See MicroConvention.is_plain_name '}
             self._error(write_key=write_key, data=error_data)
             raise Exception(json.dumps(error_data))
         else:
             write_keys = write_keys or [write_key for _ in names]
-            return self._mset_implementation(names=names, values=values, write_keys=write_keys, return_args=None,
-                                             budgets=budgets, with_percentiles=True, with_copulas=with_copulas)
+            return self._mset_implementation(
+                names=names,
+                values=values,
+                write_keys=write_keys,
+                return_args=None,
+                budgets=budgets,
+                with_percentiles=True,
+                with_copulas=with_copulas)
 
     def delete(self, name, write_key):
         """ Delete/expire all artifacts associated with name (links, subs, markets etc) """
         return self._permissioned_mdelete(name=name, write_key=write_key)
 
-    def mdelete(self, names, write_key: Optional[str] = None, write_keys: Optional[KeyList] = None):
+    def mdelete(
+            self,
+            names,
+            write_key: Optional[str] = None,
+            write_keys: Optional[KeyList] = None):
         """ Delete/expire all artifacts associated with multiple names """
-        return self._permissioned_mdelete(names=names, write_key=write_key, write_keys=write_keys)
+        return self._permissioned_mdelete(
+            names=names, write_key=write_key, write_keys=write_keys)
 
     # --------------------------------------------------------------------------
     #            Public interface  (set/delete scenarios)
     # --------------------------------------------------------------------------
 
-
     # --------------------------------------------------------------------------
     #            Implementation  (set)
     # --------------------------------------------------------------------------
 
-    def _mset_implementation(self, names: Optional[NameList] = None, values: Optional[ValueList] = None,
-                             write_keys: Optional[KeyList] = None, budgets: Optional[List[float]] = None,
-                             name: Optional[str] = None, value: Optional[Any] = None, write_key: Optional[str] = None,
+    def _mset_implementation(self,
+                             names: Optional[NameList] = None,
+                             values: Optional[ValueList] = None,
+                             write_keys: Optional[KeyList] = None,
+                             budgets: Optional[List[float]] = None,
+                             name: Optional[str] = None,
+                             value: Optional[Any] = None,
+                             write_key: Optional[str] = None,
                              budget: Optional[float] = None,
-                             return_args: Optional[List[str]] = None, with_percentiles=False, with_copulas=False):
+                             return_args: Optional[List[str]] = None,
+                             with_percentiles=False,
+                             with_copulas=False):
 
         if return_args is None:
             return_args = ['name', 'write_key', 'value', 'percentile']
@@ -130,15 +167,21 @@ class StreamServer(LaggedServer, ScenarioServer):
         values = [v if isinstance(v, (int, float, str)) else json.dumps(v) for v in values]
 
         # Execute assignment (creates temporary execution logs)
-        execution_log = self._pipelined_set(names=names, values=values, write_keys=write_keys, budgets=budgets)
+        execution_log = self._pipelined_set(
+            names=names,
+            values=values,
+            write_keys=write_keys,
+            budgets=budgets)
 
-        # Ensure there is at least one (truly shitty) baseline prediction and occasionally update it
+        # Ensure there is at least one (truly shitty) baseline prediction and
+        # occasionally update it
         pools = self._pools(names, self.DELAYS)
         for nm, v, wk in zip(names, values, write_keys):
             if self.is_scalar_value(v):
                 for delay_ndx, delay in enumerate(self.DELAYS):
                     if np.random.rand() < 1 / 20 and pools[nm][delay_ndx] < 4:
-                        self._baseline_prediction(name=nm, value=v, write_key=wk, delay=delay)
+                        self._baseline_prediction(
+                            name=nm, value=v, write_key=wk, delay=delay)
                     elif pools[nm][delay_ndx] >= 3:
                         # We can step aside now that two others are fighting it out.
                         self._cancel_implementation(name=nm, write_key=wk, delay=delay)
@@ -147,8 +190,13 @@ class StreamServer(LaggedServer, ScenarioServer):
         # Settlement also triggers the derived market for zscores
         if all(self.is_scalar_value(v) for v in values):
             fvalues = list(map(float, values))
-            prctls = self._msettle(names=names, values=fvalues, budgets=budgets, with_percentiles=with_percentiles,
-                                   write_keys=write_keys, with_copulas=with_copulas)
+            prctls = self._msettle(
+                names=names,
+                values=fvalues,
+                budgets=budgets,
+                with_percentiles=with_percentiles,
+                write_keys=write_keys,
+                with_copulas=with_copulas)
         else:
             prctls = None
 
@@ -161,38 +209,43 @@ class StreamServer(LaggedServer, ScenarioServer):
                     title.update({"percentiles": prctls[title["name"]]})
 
         # Write to confirmation log
-        self._confirm(write_key=write_keys[0], operation='set', count=len(titles or []), examples=titles[:2])
+        self._confirm(write_key=write_keys[0],
+                      operation='set',
+                      count=len(titles or []),
+                      examples=titles[:2])
 
         return titles[0] if singular else titles
 
     def _pipelined_set(self, names, values, write_keys, budgets):
         """ Parallel assignment and some knock-on effects of clearing (rewards, derived market) """
         ndxs = list(range(len(names)))
-        executed_obscure, rejected_obscure, ndxs, names, values, write_keys = self._pipelined_set_obscure(ndxs=ndxs,
-                                                                                                          names=names,
-                                                                                                          values=values,
-                                                                                                          write_keys=write_keys,
-                                                                                                          budgets=budgets)
-        executed_new, rejected_new, ndxs, names, values, write_keys = self._pipelined_set_new(ndxs=ndxs, names=names,
-                                                                                              values=values,
-                                                                                              write_keys=write_keys,
-                                                                                              budgets=budgets)
-        executed_existing, rejected_existing = self._pipelined_set_existing(ndxs=ndxs, names=names, values=values,
-                                                                            write_keys=write_keys, budgets=budgets)
+        executed_obscure, rejected_obscure, ndxs, names, values, write_keys = self._pipelined_set_obscure(
+            ndxs=ndxs, names=names, values=values, write_keys=write_keys, budgets=budgets)
+        executed_new, rejected_new, ndxs, names, values, write_keys = self._pipelined_set_new(
+            ndxs=ndxs, names=names, values=values, write_keys=write_keys, budgets=budgets)
+        executed_existing, rejected_existing = self._pipelined_set_existing(
+            ndxs=ndxs, names=names, values=values, write_keys=write_keys, budgets=budgets)
         executed = executed_obscure + executed_new + executed_existing
 
         # Propagate to subscribers
         modified_names = [ex["name"] for ex in executed]
         modified_values = [ex["value"] for ex in executed]
         self._propagate_to_subscribers(names=modified_names, values=modified_values)
-        return {"executed": executed, "rejected": rejected_obscure + rejected_new + rejected_existing}
+        return {
+            "executed": executed,
+            "rejected": rejected_obscure +
+            rejected_new +
+            rejected_existing}
 
     @staticmethod
     def _coerce_outputs(execution_log, exec_args=None):
         """ Convert to list of dicts containing names and write keys """
         if exec_args is None:
             exec_args = ('name', 'write_key')
-        sorted_log = sorted(execution_log["executed"] + execution_log["rejected"], key=lambda d: d['ndx'])
+        sorted_log = sorted(
+            execution_log["executed"] +
+            execution_log["rejected"],
+            key=lambda d: d['ndx'])
         return [dict((arg, s[arg]) for arg in exec_args) for s in sorted_log]
 
     def _pipelined_set_obscure(self, ndxs, names, values, write_keys, budgets):
@@ -203,7 +256,8 @@ class StreamServer(LaggedServer, ScenarioServer):
         if ndxs:
             obscure_pipe = self.client.pipeline(transaction=True)
 
-            for ndx, name, value, write_key, budget in zip(ndxs, names, values, write_keys, budgets):
+            for ndx, name, value, write_key, budget in zip(
+                    ndxs, names, values, write_keys, budgets):
                 if not (self.is_valid_value(value)):
                     rejected.append({"ndx": ndx, "name": name, "write_key": None, "value": value,
                                      "error": "invalid value of type " + str(type(value)) + " was supplied"})
@@ -215,21 +269,23 @@ class StreamServer(LaggedServer, ScenarioServer):
                         else:
                             new_name = self.random_name()
                             ttl = self._cost_based_ttl(value=value, budget=budget)
-                            obscure_pipe, intent = self._new_obscure_page(pipe=obscure_pipe, ndx=ndx, name=new_name,
-                                                                          value=value, write_key=write_key,
-                                                                          budget=budget)
+                            obscure_pipe, intent = self._new_obscure_page(
+                                pipe=obscure_pipe, ndx=ndx, name=new_name, value=value, write_key=write_key, budget=budget)
                             executed.append(intent)
                     elif not (self.is_valid_name(name)):
-                        rejected.append({"ndx": ndx, "name": name, "write_key": None, "error": "invalid name"})
+                        rejected.append({"ndx": ndx, "name": name,
+                                        "write_key": None, "error": "invalid name"})
                     else:
                         ignored_ndxs.append(ndx)
 
             if len(executed):
-                obscure_results = MicroServerConventions.chunker(results=obscure_pipe.execute(), n=len(executed))
+                obscure_results = MicroServerConventions.chunker(
+                    results=obscure_pipe.execute(), n=len(executed))
                 for intent, res in zip(executed, obscure_results):
                     intent.update({"result": res})
 
-        # Marshall residual. Return indexes, names, values and write_keys that are yet to be processed.
+        # Marshall residual. Return indexes, names, values and write_keys that are
+        # yet to be processed.
         names = [n for n, ndx in zip(names, ndxs) if ndx in ignored_ndxs]
         values = [v for v, ndx in zip(values, ndxs) if ndx in ignored_ndxs]
         write_keys = [w for w, ndx in zip(write_keys, ndxs) if ndx in ignored_ndxs]
@@ -249,20 +305,23 @@ class StreamServer(LaggedServer, ScenarioServer):
             exists = exists_pipe.execute()
 
             new_pipe = self.client.pipeline(transaction=False)
-            for exist, ndx, name, value, write_key, budget in zip(exists, ndxs, names, values, write_keys, budgets):
+            for exist, ndx, name, value, write_key, budget in zip(
+                    exists, ndxs, names, values, write_keys, budgets):
                 if not (exist):
                     if not (self.is_valid_key(write_key)):
-                        rejected.append({"ndx": ndx, "name": name, "write_key": None, "errror": "invalid write_key"})
+                        rejected.append({"ndx": ndx, "name": name,
+                                        "write_key": None, "errror": "invalid write_key"})
                     else:
                         ttl = self._cost_based_ttl(value=value, budget=budget)
-                        new_pipe, intent = self._new_page(new_pipe, ndx=ndx, name=name, value=value,
-                                                          write_key=write_key, budget=budget, fakeredis=fakeredis)
+                        new_pipe, intent = self._new_page(
+                            new_pipe, ndx=ndx, name=name, value=value, write_key=write_key, budget=budget, fakeredis=fakeredis)
                         executed.append(intent)
                 else:
                     ignored_ndxs.append(ndx)
 
             if len(executed):
-                new_results = MicroServerConventions.chunker(results=new_pipe.execute(), n=len(executed))
+                new_results = MicroServerConventions.chunker(
+                    results=new_pipe.execute(), n=len(executed))
                 for intent, res in zip(executed, new_results):
                     intent.update({"result": res})
 
@@ -280,23 +339,35 @@ class StreamServer(LaggedServer, ScenarioServer):
             modify_pipe = self.client.pipeline(transaction=False)
             error_pipe = self.client.pipeline(transaction=False)
             official_write_keys = self._mauthority(names)
-            for ndx, name, value, write_key, official_write_key, budget in zip(ndxs, names, values, write_keys,
-                                                                               official_write_keys, budgets):
+            for ndx, name, value, write_key, official_write_key, budget in zip(
+                    ndxs, names, values, write_keys, official_write_keys, budgets):
                 if write_key == official_write_key:
-                    modify_pipe, intent = self._modify_page(modify_pipe, ndx=ndx, name=name, value=value, budget=budget)
+                    modify_pipe, intent = self._modify_page(
+                        modify_pipe, ndx=ndx, name=name, value=value, budget=budget)
                     intent.update({"ndx": ndx, "write_key": write_key})
                     executed.append(intent)
                 else:
-                    auth_message = {"ndx": ndx, "name": name, "value": value, "write_key": write_key,
+                    auth_message = {"ndx": ndx,
+                                    "name": name,
+                                    "value": value,
+                                    "write_key": write_key,
                                     "official_write_key_ends_in": official_write_key[-4:],
                                     "error": "write_key does not match page_key on record"}
                     intent = auth_message
-                    error_pipe.lpush(self.errors_name(write_key=write_key), json.dumps(auth_message))
+                    error_pipe.lpush(
+                        self.errors_name(
+                            write_key=write_key),
+                        json.dumps(auth_message))
                     error_pipe.expire(self.errors_name(write_key=write_key), self.ERROR_TTL)
-                    error_pipe.ltrim(name=self.errors_name(write_key=write_key), start=0, end=self.ERROR_LIMIT)
+                    error_pipe.ltrim(
+                        name=self.errors_name(
+                            write_key=write_key),
+                        start=0,
+                        end=self.ERROR_LIMIT)
                     rejected.append(intent)
             if len(executed):
-                modify_results = MicroServerConventions.chunker(results=modify_pipe.execute(), n=len(executed))
+                modify_results = MicroServerConventions.chunker(
+                    results=modify_pipe.execute(), n=len(executed))
                 for intent, res in zip(executed, modify_results):
                     intent.update({"result": res})
 
@@ -318,10 +389,12 @@ class StreamServer(LaggedServer, ScenarioServer):
             for subscriber in subscribers_set:
                 mailbox_name = self.messages_name(subscriber)
                 propagate_pipe.hset(name=mailbox_name, key=sender_name, value=value)
-                executed.append({"mailbox_name": mailbox_name, "sender": sender_name, "value": value})
+                executed.append({"mailbox_name": mailbox_name,
+                                "sender": sender_name, "value": value})
 
         if len(executed):
-            propagation_results = MicroServerConventions.chunker(results=propagate_pipe.execute(), n=len(executed))
+            propagation_results = MicroServerConventions.chunker(
+                results=propagate_pipe.execute(), n=len(executed))
             for intent, res in zip(executed, propagation_results):
                 intent.update({"result": res})
 
@@ -329,8 +402,8 @@ class StreamServer(LaggedServer, ScenarioServer):
 
     def _new_obscure_page(self, pipe, ndx, name, value, write_key, budget, fakeredis=False):
         """ Almost the same as a new page """
-        pipe, intent = self._new_page(pipe=pipe, ndx=ndx, name=name, value=value, write_key=write_key, budget=budget,
-                                      fakeredis=fakeredis)
+        pipe, intent = self._new_page(
+            pipe=pipe, ndx=ndx, name=name, value=value, write_key=write_key, budget=budget, fakeredis=fakeredis)
         intent.update({"obscure": True})
         return pipe, intent
 
@@ -345,18 +418,27 @@ class StreamServer(LaggedServer, ScenarioServer):
         pipe.sadd(self._NAMES, name)
         # Charge for stream creation
         create_charge = -budget * self._CREATE_COST
-        transaction_record = {"settlement_time": str(datetime.datetime.now()), "type": "create",
-                              "write_key": write_key, "amount": create_charge,
-                              "message": "charge for new stream creation", "name": name}
+        transaction_record = {
+            "settlement_time": str(
+                datetime.datetime.now()),
+            "type": "create",
+            "write_key": write_key,
+            "amount": create_charge,
+            "message": "charge for new stream creation",
+            "name": name}
         pipe.hincrbyfloat(name=self._BALANCES, key=write_key, amount=create_charge)
         if not fakeredis:
             log_names = [self.transactions_name(write_key=write_key),
                          self.transactions_name(write_key=write_key, name=name)]
             for ln in log_names:
-                pipe.xadd(name=ln, fields=transaction_record, maxlen=self.TRANSACTIONS_LIMIT)
+                pipe.xadd(
+                    name=ln,
+                    fields=transaction_record,
+                    maxlen=self.TRANSACTIONS_LIMIT)
                 pipe.expire(name=ln, time=self._TRANSACTIONS_TTL)
         # Then modify
-        pipe, intent = self._modify_page(pipe=pipe, ndx=ndx, name=name, value=value, budget=budget)
+        pipe, intent = self._modify_page(
+            pipe=pipe, ndx=ndx, name=name, value=value, budget=budget)
         intent.update({"new": True, "write_key": write_key, "value": value})
         return pipe, intent
 
@@ -376,9 +458,21 @@ class StreamServer(LaggedServer, ScenarioServer):
         # (1.5) Update the time to live for predictions and samples
         distribution_ttl = self._cost_based_distribution_ttl(budget=budget)
         for delay in self.DELAYS:
-            pipe.expire(name=self._samples_name(name=name, delay=delay), time=distribution_ttl)
-            pipe.expire(name=self._sample_owners_name(name=name, delay=delay), time=distribution_ttl)
-            pipe.expire(name=self._predictions_name(name=name, delay=delay), time=distribution_ttl)
+            pipe.expire(
+                name=self._samples_name(
+                    name=name,
+                    delay=delay),
+                time=distribution_ttl)
+            pipe.expire(
+                name=self._sample_owners_name(
+                    name=name,
+                    delay=delay),
+                time=distribution_ttl)
+            pipe.expire(
+                name=self._predictions_name(
+                    name=name,
+                    delay=delay),
+                time=distribution_ttl)
 
         # (2) Decide how to store: lags, history or neither, but always use exactly six operations
         len_in = len(pipe)
@@ -400,7 +494,8 @@ class StreamServer(LaggedServer, ScenarioServer):
             pipe.expire(lv, ttl)
             pipe.expire(lt, ttl)
 
-        # Other types value field(s) may be stored in stream instead ... (note again: exactly six operations so chunking of pipeline is trivial)
+        # Other types value field(s) may be stored in stream instead ... (note
+        # again: exactly six operations so chunking of pipeline is trivial)
         if not good_for_lags:
             if self._streams_support():
                 if self.is_small_value(value):
@@ -424,15 +519,23 @@ class StreamServer(LaggedServer, ScenarioServer):
         # (4) Construct delay promises
         utc_epoch_now = int(time.time())
         for delay in self.DELAYS:
-            queue = self._promise_queue_name(utc_epoch_now + delay)  # self.PROMISES+str(utc_epoch_now+delay)
-            destination = self.delayed_name(name=name, delay=delay)  # self.DELAYED+str(delay_seconds)+self.SEP+name
+            # self.PROMISES+str(utc_epoch_now+delay)
+            queue = self._promise_queue_name(utc_epoch_now + delay)
+            # self.DELAYED+str(delay_seconds)+self.SEP+name
+            destination = self.delayed_name(name=name, delay=delay)
             promise = self._copy_promise(source=name_of_copy, destination=destination)
             pipe.sadd(queue, promise)
             pipe.expire(name=queue, time=promise_ttl)
 
         # (5) Execution log
-        intent = {"ndx": ndx, "name": name, "value": value, "ttl": ttl, "new": False, "obscure": False,
-                  "copy": name_of_copy}
+        intent = {
+            "ndx": ndx,
+            "name": name,
+            "value": value,
+            "ttl": ttl,
+            "new": False,
+            "obscure": False,
+            "copy": name_of_copy}
 
         return pipe, intent
 
@@ -440,15 +543,24 @@ class StreamServer(LaggedServer, ScenarioServer):
     #            Implementation  (delete)
     # --------------------------------------------------------------------------
 
-    def _permissioned_mdelete(self, name=None, write_key=None, names: Optional[NameList] = None,
-                              write_keys: Optional[KeyList] = None):
+    def _permissioned_mdelete(
+            self,
+            name=None,
+            write_key=None,
+            names: Optional[NameList] = None,
+            write_keys: Optional[KeyList] = None):
         """ Permissioned delete """
         names = names or [name]
         self.assert_not_in_reserved_namespace(names)
         write_keys = write_keys or [write_key for _ in names]
         are_valid = self._mauthorize(names, write_keys)
 
-        authorized_kill_list = [name for (name, is_valid_write_key) in zip(names, are_valid) if is_valid_write_key]
+        authorized_kill_list = [
+            name for (
+                name,
+                is_valid_write_key) in zip(
+                names,
+                are_valid) if is_valid_write_key]
         if authorized_kill_list:
             return self._delete_implementation(*authorized_kill_list)
         else:
@@ -494,16 +606,19 @@ class StreamServer(LaggedServer, ScenarioServer):
         for name, backlinks in zip(names, backlinks_res):
             for backlink in list(backlinks.keys()):
                 root, delay = self._interpret_delay(backlink)
-                delete_pipe = self._unlink_pipe(pipe=delete_pipe, name=root, delay=int(delay), target=name)
+                delete_pipe = self._unlink_pipe(
+                    pipe=delete_pipe, name=root, delay=int(delay), target=name)
 
         # (b-2) Force subscribers to unsubscribe
         for name, subscribers in zip(names, subscribers_res):
             for subscriber in subscribers:
-                delete_pipe = self._unsubscribe_pipe(pipe=delete_pipe, name=subscriber, source=name)
+                delete_pipe = self._unsubscribe_pipe(
+                    pipe=delete_pipe, name=subscriber, source=name)
 
         # (b-3) Unsubscribe gracefully
         for name, sources in zip(names, subscriptions_res):
-            delete_pipe = self._unsubscribe_pipe(pipe=delete_pipe, name=name, sources=sources)
+            delete_pipe = self._unsubscribe_pipe(
+                pipe=delete_pipe, name=name, sources=sources)
 
         # (b-4) Unlink gracefully
         for name_ndx, name in enumerate(names):
@@ -512,11 +627,13 @@ class StreamServer(LaggedServer, ScenarioServer):
                 targets = list(info_exec[link_ndx].keys())
                 if targets:
                     for target in targets:
-                        delete_pipe = self._unlink_pipe(pipe=delete_pipe, name=name, delay=delay, target=target)
+                        delete_pipe = self._unlink_pipe(
+                            pipe=delete_pipe, name=name, delay=delay, target=target)
 
         # (b-5) Then discard derived ... delete can be slow so we expire instead
         for name in names:
-            derived_names = list(self.derived_names(name).values()) + list(self._private_derived_names(name).values())
+            derived_names = list(self.derived_names(name).values()) + \
+                list(self._private_derived_names(name).values())
             for derived_name in derived_names:
                 delete_pipe.pexpire(name=derived_name, time=1)
 
@@ -538,15 +655,19 @@ class StreamServer(LaggedServer, ScenarioServer):
     #            Implementation  (touch)
     # --------------------------------------------------------------------------
 
-
-
     def _touch_implementation(self, name, write_key, budget, example_value=3.145):
         """ Extend life of stream """
-        execut = self.client.expire(name=name, time=self._cost_based_ttl(value=example_value, budget=budget))
+        execut = self.client.expire(
+            name=name, time=self._cost_based_ttl(
+                value=example_value, budget=budget))
         self._confirm(write_key=write_key, operation='touch', name=name, execution=execut)
         if not execut:
-            self._warn(write_key=write_key, operation='touch', error='expiry not set ... names may not exist',
-                       name=name, exec=execut)
+            self._warn(
+                write_key=write_key,
+                operation='touch',
+                error='expiry not set ... names may not exist',
+                name=name,
+                exec=execut)
         return execut
 
     def _mtouch_implementation(self, names, write_key, budgets, example_value=3.145):
@@ -564,8 +685,12 @@ class StreamServer(LaggedServer, ScenarioServer):
         report = dict(zip(all_names, exec))
         self._confirm(write_key=write_key, operation='mtouch', count=sum(exec))
         if not any(exec):
-            self._warn(write_key=write_key, operation='mtouch', error='expiry not set ... names may not exist',
-                       data=report, ttls=ttls)
+            self._warn(
+                write_key=write_key,
+                operation='mtouch',
+                error='expiry not set ... names may not exist',
+                data=report,
+                ttls=ttls)
         return sum(exec)
 
     def _copula_touch_implementation(self, names, budgets):
@@ -575,15 +700,9 @@ class StreamServer(LaggedServer, ScenarioServer):
     #            Implementation  (subscribe)
     # --------------------------------------------------------------------------
 
-
-
     # --------------------------------------------------------------------------
     #      Implementation  (Admministrative - garbage collection )
     # --------------------------------------------------------------------------
-
-
-
-
 
     # --------------------------------------------------------------------------
     #            Implementation  (Administrative - promises)
@@ -600,16 +719,17 @@ class StreamServer(LaggedServer, ScenarioServer):
         # Find recent cancellation queues that exist
         exists_pipe = self.client.pipeline()
         utc_epoch_now = int(time.time())
-        candidates = list(set(
-            [self._cancellation_queue_name(epoch_seconds=self._cancellation_rounded_time(utc_epoch_now - seconds)) for
-             seconds in range(self._CANCEL_GRACE, -1, -1)]))
+        candidates = list(set([self._cancellation_queue_name(epoch_seconds=self._cancellation_rounded_time(
+            utc_epoch_now - seconds)) for seconds in range(self._CANCEL_GRACE, -1, -1)]))
         for candidate in candidates:
             exists_pipe.stream_exists(candidate)
         exists = exists_pipe.execute()
 
         # Get them if they exist
         get_pipe = self.client.pipeline()
-        cancellation_queue_name = [promise for promise, exist in zip(candidates, exists) if exists]
+        cancellation_queue_name = [
+            promise for promise, exist in zip(
+                candidates, exists) if exists]
         for collection_name in cancellation_queue_name:
             get_pipe.smembers(collection_name)
         cancel_collections = get_pipe.execute()
@@ -621,10 +741,11 @@ class StreamServer(LaggedServer, ScenarioServer):
             if self.CANCEL_SEP in cancellation:
                 write_key, horizon = cancellation.split(self.CANCEL_SEP)
                 name, delay = self.split_horizon_name(horizon)
-                self._delete_scenarios_implementation(name=name, write_key=write_key, delay=delay)
+                self._delete_scenarios_implementation(
+                    name=name, write_key=write_key, delay=delay)
 
-        return sum(individual_cancellations) if not with_report else {'cancellations': individual_cancellations}
-
+        return sum(individual_cancellations) if not with_report else {
+            'cancellations': individual_cancellations}
 
     # --------------------------------------------------------------------------
     #            Implementation  (prediction and settlement)
@@ -632,31 +753,24 @@ class StreamServer(LaggedServer, ScenarioServer):
 
     def _baseline_prediction(self, name, value, write_key, delay):
         # So bad !!!
-        lagged_values = self._get_lagged_implementation(name, with_times=False, with_values=True, to_float=True,
-                                                        start=0, end=None, count=self.num_predictions)
+        lagged_values = self._get_lagged_implementation(
+            name,
+            with_times=False,
+            with_values=True,
+            to_float=True,
+            start=0,
+            end=None,
+            count=self.num_predictions)
         predictions = self.empirical_predictions(lagged_values=lagged_values)
-        return self._set_scenarios_implementation(name=name, values=predictions, write_key=write_key, delay=delay)
-
-
-
-
-
-
-
-
-
+        return self._set_scenarios_implementation(
+            name=name, values=predictions, write_key=write_key, delay=delay)
 
     @staticmethod
     def _flatten(list_of_lists):
         return [item for sublist in list_of_lists for item in sublist]
 
 
-
-
-
-
 class StreamServer(SummarizingHabits):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-

@@ -3,6 +3,5 @@ from predictionserver.futureconventions.horizonconventions import HorizonConvent
 
 class HorizonHabits(HorizonConventions):
 
-    def __init__(self,**kwargs):
+    def __init__(self, **kwargs):
         super().__init__(**kwargs)
-

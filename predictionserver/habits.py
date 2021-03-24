@@ -20,11 +20,11 @@ class Habits(PlottingHabits, LaggedHabits, HorizonHabits, ScenarioHabits, StatsH
              AttributeHabits, MetricHabits, HashHabits, SortedSetHabits,
              MemoHabits, BalanceHabits, OwnershipHabits, KeyHabits, AutoConfigure, ZCurveConventions):
 
-    def __init__(self,**kwargs):
+    def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     habits = Habits()
     print(habits.BALANCE)
-    print(habits._OWNERS()) # <--- will fail
+    print(habits._OWNERS())  # <--- will fail

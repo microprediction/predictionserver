@@ -220,7 +220,8 @@ def test_stream_horizon_hash():
     for hash_type in HashType:
         name_granularity = HashNameGranularity.name_and_delay
         key_granularity = HashKeyGranularity.code
-        server._set_ownership_implementation(name=kwargs['name'], write_key=kwargs['write_key'])
+        server._set_ownership_implementation(
+            name=kwargs['name'], write_key=kwargs['write_key'])
         res = server.set_hash_value(hash_type=hash_type,
                                     name_granularity=name_granularity,
                                     key_granularity=key_granularity,
@@ -325,7 +326,8 @@ def test_stream_horizon_hash():
                                         **kwargs)
         assert len(values) == 0
 
-        server._delete_ownership_implementation(name=kwargs['name'], write_key=kwargs['write_key'])
+        server._delete_ownership_implementation(
+            name=kwargs['name'], write_key=kwargs['write_key'])
 
 
 def test_authorize():
@@ -335,4 +337,5 @@ def test_authorize():
               'delay': 310,
               'write_key': BABLOH_CATTLE,
               'code': server.shash(BABLOH_CATTLE)}
-    assert server._authorize_hash_change(hash_type=HashType.performance, name_granularity=HashNameGranularity.other)
+    assert server._authorize_hash_change(
+        hash_type=HashType.performance, name_granularity=HashNameGranularity.other)

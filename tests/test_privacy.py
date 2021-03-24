@@ -5,7 +5,7 @@ from predictionserver.devtools.whereami import devlocation
 
 
 def test_privacy():
-    if devlocation()=='github':
+    if devlocation() == 'github':
         verify_private_file_not_on_github()
     else:
         verify_private_file_exists_locally()

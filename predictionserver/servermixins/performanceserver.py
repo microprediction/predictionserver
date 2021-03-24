@@ -5,7 +5,8 @@ from predictionserver.futureconventions.performanceconventions import Performanc
 from pprint import pprint
 import random
 
-# Remark: try to use strict methods as they anticipate future performance granularity beyond write_key only.
+# Remark: try to use strict methods as they anticipate future performance
+# granularity beyond write_key only.
 
 
 class PerformanceServer(PerformanceHabits, BaseServer):
@@ -17,18 +18,28 @@ class PerformanceServer(PerformanceHabits, BaseServer):
         return self.get_performance_strict(granularity=PerformanceGranularity.write_key,
                                            write_key=write_key, name=name, delay=int(delay))
 
-    def get_performance_strict(self, granularity:PerformanceGranularity, write_key:str, name:str, delay:int):
-        return self._get_performance_implementation(granularity=granularity,
-                                           write_key=write_key, name=name, delay=delay)
+    def get_performance_strict(
+            self,
+            granularity: PerformanceGranularity,
+            write_key: str,
+            name: str,
+            delay: int):
+        return self._get_performance_implementation(
+            granularity=granularity, write_key=write_key, name=name, delay=delay)
 
     def get_performances(self, write_key):
-        return self.get_performances_strict(granularity=PerformanceGranularity.write_key, write_key=write_key)
+        return self.get_performances_strict(
+            granularity=PerformanceGranularity.write_key,
+            write_key=write_key)
 
     def get_performances_strict(self, granularity, write_key):
-        return self._get_performances_implementation(granularity=granularity, write_key=write_key)
+        return self._get_performances_implementation(
+            granularity=granularity, write_key=write_key)
 
     def delete_performances(self, write_key):
-        return self.delete_performances_strict(granularity=PerformanceGranularity.write_key, write_key=write_key)
+        return self.delete_performances_strict(
+            granularity=PerformanceGranularity.write_key,
+            write_key=write_key)
 
     def delete_performances_strict(self, granularity: PerformanceGranularity, **kwargs):
         """ Reset all performances to zero """
@@ -37,12 +48,19 @@ class PerformanceServer(PerformanceHabits, BaseServer):
 
     def shrink_performances(self, multiplier: float, **kwargs):
         """ Multiply all performances by a scalar (typically between 0 and 1) """
-        return self.shrink_performances_strict(granularity=PerformanceGranularity.write_key, multiplier=multiplier,
-                                                  **kwargs)
+        return self.shrink_performances_strict(
+            granularity=PerformanceGranularity.write_key,
+            multiplier=multiplier,
+            **kwargs)
 
-    def shrink_performances_strict(self, granularity: PerformanceGranularity, multiplier: float, **kwargs):
+    def shrink_performances_strict(
+            self,
+            granularity: PerformanceGranularity,
+            multiplier: float,
+            **kwargs):
         """ Multiply all performances by a scalar (typically between 0 and 1) """
-        return self._shrink_performances_implementation(granularity=granularity, multiplier=multiplier, **kwargs)
+        return self._shrink_performances_implementation(
+            granularity=granularity, multiplier=multiplier, **kwargs)
 
     # -------------
     #   System use
@@ -64,7 +82,10 @@ class PerformanceServer(PerformanceHabits, BaseServer):
     # --------------
 
     def _get_performances_implementation(self, granularity, write_key):
-        performance = self.client.hgetall(name=self.performance_name(granularity=granularity, write_key=write_key))
+        performance = self.client.hgetall(
+            name=self.performance_name(
+                granularity=granularity,
+                write_key=write_key))
         return self._descending_values(performance)
 
     def _get_performance_implementation(self, granularity, write_key, name, delay):
@@ -76,15 +97,21 @@ class PerformanceServer(PerformanceHabits, BaseServer):
             performance = 0
         return performance
 
-    def _delete_performances_implementation(self, granularity: PerformanceGranularity, **kwargs):
+    def _delete_performances_implementation(
+            self, granularity: PerformanceGranularity, **kwargs):
         if self._PERFORMANCE_BACKWARD_COMPATIBLE:
             self.client.delete(self.performance_name_old(granularity=granularity, **kwargs))
         return self.client.delete(self.performance_name(granularity=granularity, **kwargs))
 
-    def _shrink_performances_implementation(self, granularity: PerformanceGranularity, multiplier: float, **kwargs):
+    def _shrink_performances_implementation(
+            self,
+            granularity: PerformanceGranularity,
+            multiplier: float,
+            **kwargs):
         """ Multiply performances by a scalar """
         pn = self.performance_name(variety=granularity, **kwargs)
-        temporary_key = 'temporary_' + ''.join([random.choice(['a', 'b', 'c']) for _ in range(20)])
+        temporary_key = 'temporary_' + \
+            ''.join([random.choice(['a', 'b', 'c']) for _ in range(20)])
         shrink_pipe = self.client.pipeline(transaction=True)
         shrink_pipe.zunionstore(dest=temporary_key, keys={pn: multiplier})
         shrink_pipe.zunionstore(dest=pn, keys={temporary_key: 1})
@@ -97,7 +124,8 @@ class StandalonePerformanceServer(PerformanceServer, OwnershipServer, BaseServer
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-if __name__=='__main__':
+
+if __name__ == '__main__':
     from predictionserver.collider_config_private import REDIZ_COLLIDER_CONFIG, EMBLOSSOM_MOTH
     server = StandalonePerformanceServer(**REDIZ_COLLIDER_CONFIG)
     perf = server.get_performances(write_key=EMBLOSSOM_MOTH)

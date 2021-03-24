@@ -13,7 +13,7 @@ def test_attribute_client_no_parser(attribute_client):
       CHECK: we can call the local server
     """
     res = requests.patch(url='http://127.0.0.1:5000/OwnerPrivateAttribute')
-    assert res.status_code==200
+    assert res.status_code == 200
 
 
 @pytest.mark.usefixtures
@@ -24,7 +24,7 @@ def test_attribute_client_with_parsers(attribute_client):
     """
     write_key = random.choice(TESTING_KEYS)
     assert KeyConventions.is_valid_key(write_key=write_key)
-    assert KeyConventions.key_difficulty(write_key=write_key)>=12
+    assert KeyConventions.key_difficulty(write_key=write_key) >= 12
     payload = {'attribute_type': 'email', 'write_key': write_key}
 
     res1 = requests.patch(url='http://127.0.0.1:5000/OwnerPrivateAttribute')
@@ -32,5 +32,3 @@ def test_attribute_client_with_parsers(attribute_client):
     res2 = requests.options(url='http://127.0.0.1:5000/OwnerPrivateAttribute')
     d = res2.json()
     pass
-
-

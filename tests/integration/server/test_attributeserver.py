@@ -94,8 +94,10 @@ def test_set_private_attribute_implicit():
     server = AttributeServer()
     server.connect(**MICRO_TEST_CONFIG)
     EMAIL = 'me@private.com'
-    server.set_attribute(attribute_type=AttributeType.email, value=EMAIL, write_key=BABLOH_CATTLE)
-    value = server.get_attribute(attribute_type=AttributeType.email, write_key=BABLOH_CATTLE)
+    server.set_attribute(attribute_type=AttributeType.email,
+                         value=EMAIL, write_key=BABLOH_CATTLE)
+    value = server.get_attribute(
+        attribute_type=AttributeType.email, write_key=BABLOH_CATTLE)
     assert value == EMAIL
     value_again = server.get_owner_email(write_key=BABLOH_CATTLE)
     assert value_again == EMAIL
@@ -110,7 +112,8 @@ def test_set_code_attribute_implicit():
                                     verbose=False)
     # Get back explicitly
     for attribute, value in PUBLIC_PROFILE.items():
-        value_back = server.get_attribute(attribute_type=attribute, granularity=AttributeGranularity.code, code=code)
+        value_back = server.get_attribute(
+            attribute_type=attribute, granularity=AttributeGranularity.code, code=code)
         assert value == value_back
 
     description = server.get_owner_description(code=code)
@@ -196,7 +199,8 @@ def test_delete_horizon_attribute_manually():
                                                 granularity=AttributeGranularity.name_and_delay,
                                                 name=name, delay=server.DELAYS[0])
         assert description_back == value
-        description_back_again = server.get_horizon_description(name=name, delay=server.DELAYS[0])
+        description_back_again = server.get_horizon_description(
+            name=name, delay=server.DELAYS[0])
         assert description_back_again == value
 
         assert server.delete_attribute(attribute_type=AttributeType.description,
@@ -232,13 +236,13 @@ def test_delete_horizon_attribute_manually_implicitly():
                                                 granularity=AttributeGranularity.name_and_delay,
                                                 name=name, delay=server.DELAYS[0])
         assert description_back == value
-        description_back_again = server.get_horizon_description(name=name, delay=server.DELAYS[0])
+        description_back_again = server.get_horizon_description(
+            name=name, delay=server.DELAYS[0])
         assert description_back_again == value
 
         assert server.delete_attribute(attribute_type=AttributeType.description,
                                        write_key=BABLOH_CATTLE, verbose=False,
                                        name=name, delay=server.DELAYS[0])
-
 
     except Exception as e:
         server.client.hdel(server._OWNERSHIP(), name)
@@ -308,7 +312,8 @@ def test_delete_all_public_owner_attributes():
         assert value_back == value
 
     pipe = server.client.pipeline()
-    pipe = server._pipe_delete_all_public_owner_attributes(pipe=pipe, write_key=BABLOH_CATTLE)
+    pipe = server._pipe_delete_all_public_owner_attributes(
+        pipe=pipe, write_key=BABLOH_CATTLE)
     execution = pipe.execute()
     assert sum(ex == 1 for ex in execution) >= len(PUBLIC_PROFILE)
 
@@ -321,16 +326,19 @@ def test_delete_all_private_owner_attributes():
     server.connect(**MICRO_TEST_CONFIG)
     code = server.shash(BABLOH_CATTLE)
     for attribute, value in PRIVATE_PROFILE.items():
-        assert server.set_attribute(attribute_type=attribute, value=value, write_key=BABLOH_CATTLE, verbose=False)
+        assert server.set_attribute(attribute_type=attribute,
+                                    value=value, write_key=BABLOH_CATTLE, verbose=False)
 
     for attribute, value in PRIVATE_PROFILE.items():
         value_back = server.get_attribute(attribute_type=attribute, write_key=BABLOH_CATTLE)
         assert value_back == value
 
     pipe = server.client.pipeline()
-    pipe = server._pipe_delete_all_private_owner_attributes(pipe=pipe, write_key=BABLOH_CATTLE)
+    pipe = server._pipe_delete_all_private_owner_attributes(
+        pipe=pipe, write_key=BABLOH_CATTLE)
     execution = pipe.execute()
-    assert sum(ex == 1 for ex in execution) >= len(PRIVATE_PROFILE)  # Other tests may confuse the issue
+    assert sum(ex == 1 for ex in execution) >= len(
+        PRIVATE_PROFILE)  # Other tests may confuse the issue
 
     for attribute, value in PRIVATE_PROFILE.items():
         assert server.get_attribute(attribute_type=attribute, code=code) is None

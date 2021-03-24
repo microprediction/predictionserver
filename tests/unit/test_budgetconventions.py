@@ -1,15 +1,15 @@
+from pprint import pprint
 from predictionserver.futureconventions.keyconventions import KeyConventions
 from predictionserver.futureconventions.budgetconventions import BudgetConventions
 from predictionserver.futureconventions.activityconventions import Activity
 import pytest
 from predictionserver.set_config import MICRO_TEST_CONFIG
 BABLOH_CATTLE = MICRO_TEST_CONFIG['BABLOH_CATTLE']
-from pprint import pprint
 
 
 def test_init():
     kc = BudgetConventions()
-    assert kc.MIN_BALANCE==-1
+    assert kc.MIN_BALANCE == -1
 
 
 def test_init_no_args():
@@ -19,10 +19,10 @@ def test_init_no_args():
 
 def test_defaults():
     kc = BudgetConventions()
-    assert kc.MIN_DIFFICULTIES[Activity.set]>10
+    assert kc.MIN_DIFFICULTIES[Activity.set] > 10
 
 
-class BalanceMocker(BudgetConventions,KeyConventions):
+class BalanceMocker(BudgetConventions, KeyConventions):
 
     def __init__(self):
         super().__init__()
@@ -35,7 +35,7 @@ class BalanceMocker(BudgetConventions,KeyConventions):
 def test_own_write_key():
     bc = BalanceMocker()
     bc.write_key = BABLOH_CATTLE
-    assert bc.own_write_key()==BABLOH_CATTLE
+    assert bc.own_write_key() == BABLOH_CATTLE
 
 
 def test_get_own_balance():
@@ -60,9 +60,8 @@ def test_distance_to_bankruptcy():
         mock.distance_to_bankruptcy()
     with pytest.raises(AttributeError):
         mock.distance_to_bankruptcy(level=-10)
-    assert mock.distance_to_bankruptcy(balance=0,level=-10)==10
+    assert mock.distance_to_bankruptcy(balance=0, level=-10) == 10
     mock.write_key = BABLOH_CATTLE
-    assert mock.distance_to_bankruptcy(balance=0)==4096
+    assert mock.distance_to_bankruptcy(balance=0) == 4096
     mock.balance = 4
     assert mock.distance_to_bankruptcy() == 4100
-

@@ -22,20 +22,26 @@ def test_sortedset_location():
                               name=name, delay=delay)
     assert l == 'boom::sortedset::leaderboard::name_and_delay::'+name+'|'+str(delay)
 
-    kwargs = {'write_key':BABLOH_CATTLE,
-              'name':name,
-              'delay':delay,
-              'code':KeyConventions.shash(BABLOH_CATTLE),
-              'genus':Genus.bivariate,
-              'memory':Memory.short,
-              'index':31}
+    kwargs = {'write_key': BABLOH_CATTLE,
+              'name': name,
+              'delay': delay,
+              'code': KeyConventions.shash(BABLOH_CATTLE),
+              'genus': Genus.bivariate,
+              'memory': Memory.short,
+              'index': 31}
     for sortedset_type in SortedSetType:
         for name_granularity in SortedSetNameGranularity:
-            l1 = ah.sortedset_location(sortedset_type=sortedset_type, name_granularity=name_granularity,**kwargs)
-            l2 = ah.sortedset_location(sortedset_type=str(sortedset_type), name_granularity=name_granularity,**kwargs)
-            l3 = ah.sortedset_location(sortedset_type=sortedset_type, name_granularity=str(name_granularity),**kwargs)
-            l4 = ah.sortedset_location(sortedset_type=str(sortedset_type), name_granularity=str(name_granularity),**kwargs)
-            assert l1 == 'boom::sortedset::'+str(sortedset_type)+'::'+str(name_granularity)+'::'+name_granularity.instance_name(**kwargs)
+            l1 = ah.sortedset_location(sortedset_type=sortedset_type,
+                                       name_granularity=name_granularity, **kwargs)
+            l2 = ah.sortedset_location(sortedset_type=str(
+                sortedset_type), name_granularity=name_granularity, **kwargs)
+            l3 = ah.sortedset_location(sortedset_type=sortedset_type,
+                                       name_granularity=str(name_granularity), **kwargs)
+            l4 = ah.sortedset_location(sortedset_type=str(
+                sortedset_type), name_granularity=str(name_granularity), **kwargs)
+            assert l1 == 'boom::sortedset::' + \
+                str(sortedset_type)+'::'+str(name_granularity) + \
+                '::'+name_granularity.instance_name(**kwargs)
             assert l2 == l2
             assert l3 == l1
             assert l4 == l1
@@ -52,15 +58,12 @@ def test_sortedset_key():
               'delay': delay,
               'genus': Genus.bivariate,
               'memory': Memory.short,
-              'code':BABLOH_CATTLE,
-              'index':17,
-              'other':'side'}
+              'code': BABLOH_CATTLE,
+              'index': 17,
+              'other': 'side'}
     for key_granularity in SortedSetKeyGranularity:
-        l1 = ah.sortedset_key( key_granularity=key_granularity, **kwargs)
-        l2 = ah.sortedset_key( key_granularity=str(key_granularity), **kwargs)
+        l1 = ah.sortedset_key(key_granularity=key_granularity, **kwargs)
+        l2 = ah.sortedset_key(key_granularity=str(key_granularity), **kwargs)
         expected = key_granularity.instance_name(**kwargs)
         assert l1 == expected
         assert l2 == expected
-
-
-

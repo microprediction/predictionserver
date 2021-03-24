@@ -9,13 +9,9 @@ def test_type_error():
 
 
 def test_enum():
-    assert HashNameGranularity[str(HashNameGranularity.write_key)]==HashNameGranularity.write_key
+    assert HashNameGranularity[str(HashNameGranularity.write_key)
+                               ] == HashNameGranularity.write_key
     assert HashNameGranularity[str(HashNameGranularity.name)] == HashNameGranularity.name
     assert HashKeyGranularity[str(HashKeyGranularity.name)] == HashKeyGranularity.name
-    assert HashKeyGranularity[str(HashKeyGranularity.name_and_delay)] == HashKeyGranularity.name_and_delay
-
-
-
-
-
-
+    assert HashKeyGranularity[str(HashKeyGranularity.name_and_delay)
+                              ] == HashKeyGranularity.name_and_delay

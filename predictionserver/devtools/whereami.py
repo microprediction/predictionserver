@@ -1,7 +1,7 @@
 import os
 
 
-def devlocation()->str:
+def devlocation() -> str:
     """
        :return:  'local' or 'github
     """

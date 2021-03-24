@@ -100,7 +100,11 @@ class LiveServer(SummarizingHabits):
             data = None
         return data
 
-    def _get_implementation(self, name: Optional[str] = None, names: Optional[NameList] = None, **nuissance):
+    def _get_implementation(
+            self,
+            name: Optional[str] = None,
+            names: Optional[NameList] = None,
+            **nuissance):
         """ Retrieve value(s). No permission required. Write_keys or other extraneous arguments ignored. """
         plural = names is not None
         names = names or [name]
@@ -109,7 +113,8 @@ class LiveServer(SummarizingHabits):
 
     def _pipelined_get(self, names):
         """ Retrieve name values """
-        # mget() may be faster but might be more prone to interrupt other processes? Not sure.
+        # mget() may be faster but might be more prone to interrupt other
+        # processes? Not sure.
         if len(names):
             get_pipe = self.client.pipeline(transaction=True)
             for name in names:
@@ -117,9 +122,7 @@ class LiveServer(SummarizingHabits):
             return get_pipe.execute()
 
 
-
-
-if __name__=='__main__':
+if __name__ == '__main__':
     from predictionserver.collider_config_private import REDIZ_COLLIDER_CONFIG, EMBLOSSOM_MOTH
     server = LiveServer()
     server.connect(**REDIZ_COLLIDER_CONFIG)

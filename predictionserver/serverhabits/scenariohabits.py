@@ -8,7 +8,7 @@ from predictionserver.futureconventions.zcurveconventions import ZCurveConventio
 
 class ScenarioHabits(ScenarioConventions, ObscurityHabits, ZCurveConventions):
 
-    def __init__(self,**kwargs):
+    def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.COPY_SEP = SepConventions.sep() + "copy" + SepConventions.sep()
         self.CANCEL_SEP = SepConventions.sep() + "cancel" + SepConventions.sep()
@@ -27,26 +27,34 @@ class ScenarioHabits(ScenarioConventions, ObscurityHabits, ZCurveConventions):
         self._WINDOWS = windows
 
     def _OWNERS(self):
-        return "owners" + SepConventions.sep()  # Prefix to a redundant listing of contemporaneous prediction owners by horizon. Must be private as this contains write_keys
+        # Prefix to a redundant listing of contemporaneous prediction owners by
+        # horizon. Must be private as this contains write_keys
+        return "owners" + SepConventions.sep()
 
     def _PROMISED(self):
-        return "promised" + self.SEP  # Prefixes temporary values referenced by the promise queue
+        # Prefixes temporary values referenced by the promise queue
+        return "promised" + self.SEP
 
     def _PROMISES(self):
         return self.obscurity() + "promises" + SepConventions.sep()
 
     def _CANCELLATIONS(self):
-        return self.obscurity() + "cancellations" + SepConventions.sep()  # Prefixes queues of operations that are indexed by minute
+        # Prefixes queues of operations that are indexed by minute
+        return self.obscurity() + "cancellations" + SepConventions.sep()
 
     def _PREDICTIONS(self):
-        return self.obscurity() + self.PREDICTIONS  # Prefix to a listing of contemporaneous predictions by horizon. Must be private as this contains write_keys
+        # Prefix to a listing of contemporaneous predictions by horizon. Must be
+        # private as this contains write_keys
+        return self.obscurity() + self.PREDICTIONS
 
     def _SAMPLES(self):
-        return self.obscurity() + self.SAMPLES  # Prefix to delayed predictions by horizon. Contain write_keys !
+        # Prefix to delayed predictions by horizon. Contain write_keys !
+        return self.obscurity() + self.SAMPLES
 
     def _random_promised_name(self, name):
         name_stem = os.path.splitext(name)[0]
-        return self._PROMISED + str(uuid.uuid4())[:8] + SepConventions.sep() + name_stem + '.json'
+        return self._PROMISED + \
+            str(uuid.uuid4())[:8] + SepConventions.sep() + name_stem + '.json'
 
     def _copy_promise(self, source, destination):
         return source + self.COPY_SEP + destination
@@ -67,7 +75,9 @@ class ScenarioHabits(ScenarioConventions, ObscurityHabits, ZCurveConventions):
         return self._SAMPLES + str(delay) + SepConventions.sep() + name
 
     def _format_scenario(self, write_key, k):
-        """ A "ticket" indexed by write_key and an index from 0 to self.NUM_PREDiCTIONS-1 """
+        """
+        A "ticket" indexed by write_key and an index from 0 to self.NUM_PREDiCTIONS-1
+        """
         return str(k).zfill(8) + SepConventions.sep() + write_key
 
     def _make_scenario_obscure(self, ticket):
@@ -77,18 +87,27 @@ class ScenarioHabits(ScenarioConventions, ObscurityHabits, ZCurveConventions):
 
     def _scenario_percentile(self, scenario):
         """ Extract scenario percentile from scenario string """
-        return (0.5 + float(scenario.split(SepConventions.sep())[0])) / self.num_predictions
+        return (0.5 + float(
+            scenario.split(SepConventions.sep())[0]
+        )) / self.num_predictions
 
     def _scenario_owner(self, scenario):
         """ Extract owner of a scenario from scenario string """
         return scenario.split(SepConventions.sep())[1]
 
     def _prediction_promise(self, target, delay, predictions_name):
-        """ Format for a promise that sits in a promise queue waiting to be inserted into samples::1::name, for instance """
-        return predictions_name + self.PREDICTION_SEP + self._samples_name(name=target, delay=delay)
+        """
+        Format for a promise that sits in a promise queue waiting to be inserted
+        into samples::1::name, for instance
+        """
+        return predictions_name + self.PREDICTION_SEP + \
+            self._samples_name(name=target, delay=delay)
 
     def _cancellation_promise(self, name, delay, write_key):
-        """ Format for a promise to cancel all submitted predictions sits in a cancel queue """
+        """
+        Format for a promise to cancel all submitted predictions sits in a
+        cancel queue
+        """
         return write_key + self.CANCEL_SEP + self.horizon_name(name=name, delay=delay)
 
     def _interpret_delay(self, delay_name):
@@ -100,4 +119,3 @@ class ScenarioHabits(ScenarioConventions, ObscurityHabits, ZCurveConventions):
 
     def percentile_name(self, name, delay):
         return self.zcurve_name(names=[name], delay=delay)
-

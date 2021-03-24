@@ -1,4 +1,11 @@
-import fakeredis, math, json, redis, time, random, itertools, datetime
+import fakeredis
+import math
+import json
+import redis
+import time
+import random
+import itertools
+import datetime
 import numpy as np
 from collections import Counter, OrderedDict
 from typing import List, Any, Optional
@@ -7,7 +14,8 @@ from redis.exceptions import DataError
 from .old_conventions import MicroServerConventions, REDIZ_CONVENTIONS_ARGS, MICRO_CONVENTIONS_ARGS, KeyList, NameList, ValueList
 from predictionserver.utilities import get_json_safe, shorten, stem
 from pprint import pprint
-from predictionserver.futureconventions.typeconventions import Activity, Memo, ActivityContext  # Until we are happy
+# Until we are happy
+from predictionserver.futureconventions.typeconventions import Activity, Memo, ActivityContext
 from microconventions import LeaderboardVariety
 from predictionserver.futureconventions.attributeconventions import AttributeConventions
 from logging import warning
@@ -57,24 +65,18 @@ class MicroRedisClient(AttributeConventions):
 
 class MicroServerReader(MicroRedisClient):
 
-
-    def __init__(self,**kwargs):
+    def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
     # --------------------------------------------------------------------------
     #            Getters etc
     # --------------------------------------------------------------------------
 
-
-
     def get_samples(self, name, delay=None, delays=None):
         return self._get_samples_implementation(name=name, delay=delay, delays=delays)
 
     def get_predictions(self, name, delay=None, delays=None):
         return self._get_predictions_implementation(name=name, delay=delay, delays=delays)
-
-
-
 
     def get_budget(self, name):
         return self.client.hget(name=self.BUDGETS, key=name)
@@ -87,9 +89,6 @@ class MicroServerReader(MicroRedisClient):
     def get_budgets(self):
         return self._descending_values(self.client.hgetall(name=self.BUDGETS))
 
-
-
-
     # --------------------------------------------------------------------------
     #            Public interface  (set/delete streams)
     # --------------------------------------------------------------------------
@@ -99,7 +98,8 @@ class MicroServerReader(MicroRedisClient):
             budgets = [self.maximum_stream_budget(write_key=write_key) for _ in names]
             return self._mtouch_implementation(names=names, write_key=write_key, budgets=budgets)
         else:
-            error_data = {'operation': operation, 'message': 'Not permitted with write_key supplied', 'success': False}
+            error_data = {'operation': operation,
+                          'message': 'Not permitted with write_key supplied', 'success': False}
             self._error(write_key=write_key, data=error_data)
             return error_data
 
@@ -146,7 +146,8 @@ class MicroServerReader(MicroRedisClient):
         """ Apply set() for multiple names and values, with copula derived streams optionally """  # Todo: disallow calling with multiple write_keys
         is_plain = [MicroServerConventions.is_plain_name(name) for name in names]
         if not len(names) == len(values):
-            error_data = {'names': names, 'values': values, 'message': 'Names and values have different lengths'}
+            error_data = {'names': names, 'values': values,
+                          'message': 'Names and values have different lengths'}
             self._error(write_key=write_key, data=error_data)
             raise Exception(json.dumps(error_data))
         if not all(is_plain):
@@ -172,7 +173,6 @@ class MicroServerReader(MicroRedisClient):
     #            Public interface  (set/delete scenarios)
     # --------------------------------------------------------------------------
 
-
     # --------------------------------------------------------------------------
     #            Implementation  (set)
     # --------------------------------------------------------------------------
@@ -195,7 +195,8 @@ class MicroServerReader(MicroRedisClient):
         values = [v if isinstance(v, (int, float, str)) else json.dumps(v) for v in values]
 
         # Execute assignment (creates temporary execution logs)
-        execution_log = self._pipelined_set(names=names, values=values, write_keys=write_keys, budgets=budgets)
+        execution_log = self._pipelined_set(
+            names=names, values=values, write_keys=write_keys, budgets=budgets)
 
         # Ensure there is at least one (truly shitty) baseline prediction and occasionally update it
         pools = self._pools(names, self.DELAYS)
@@ -203,7 +204,8 @@ class MicroServerReader(MicroRedisClient):
             if self.is_scalar_value(v):
                 for delay_ndx, delay in enumerate(self.DELAYS):
                     if np.random.rand() < 1 / 20 and pools[nm][delay_ndx] < 4:
-                        self._baseline_prediction(name=nm, value=v, write_key=wk, delay=delay)
+                        self._baseline_prediction(
+                            name=nm, value=v, write_key=wk, delay=delay)
                     elif pools[nm][delay_ndx] >= 3:
                         # We can step aside now that two others are fighting it out.
                         self._cancel_implementation(name=nm, write_key=wk, delay=delay)
@@ -226,7 +228,8 @@ class MicroServerReader(MicroRedisClient):
                     title.update({"percentiles": prctls[title["name"]]})
 
         # Write to confirmation log
-        self._confirm(write_key=write_keys[0], operation='set', count=len(titles or []), examples=titles[:2])
+        self._confirm(write_key=write_keys[0], operation='set', count=len(
+            titles or []), examples=titles[:2])
 
         return titles[0] if singular else titles
 
@@ -257,7 +260,8 @@ class MicroServerReader(MicroRedisClient):
         """ Convert to list of dicts containing names and write keys """
         if exec_args is None:
             exec_args = ('name', 'write_key')
-        sorted_log = sorted(execution_log["executed"] + execution_log["rejected"], key=lambda d: d['ndx'])
+        sorted_log = sorted(execution_log["executed"] +
+                            execution_log["rejected"], key=lambda d: d['ndx'])
         return [dict((arg, s[arg]) for arg in exec_args) for s in sorted_log]
 
     def _pipelined_set_obscure(self, ndxs, names, values, write_keys, budgets):
@@ -285,12 +289,14 @@ class MicroServerReader(MicroRedisClient):
                                                                           budget=budget)
                             executed.append(intent)
                     elif not (self.is_valid_name(name)):
-                        rejected.append({"ndx": ndx, "name": name, "write_key": None, "error": "invalid name"})
+                        rejected.append({"ndx": ndx, "name": name,
+                                        "write_key": None, "error": "invalid name"})
                     else:
                         ignored_ndxs.append(ndx)
 
             if len(executed):
-                obscure_results = MicroServerConventions.chunker(results=obscure_pipe.execute(), n=len(executed))
+                obscure_results = MicroServerConventions.chunker(
+                    results=obscure_pipe.execute(), n=len(executed))
                 for intent, res in zip(executed, obscure_results):
                     intent.update({"result": res})
 
@@ -317,7 +323,8 @@ class MicroServerReader(MicroRedisClient):
             for exist, ndx, name, value, write_key, budget in zip(exists, ndxs, names, values, write_keys, budgets):
                 if not (exist):
                     if not (self.is_valid_key(write_key)):
-                        rejected.append({"ndx": ndx, "name": name, "write_key": None, "errror": "invalid write_key"})
+                        rejected.append({"ndx": ndx, "name": name,
+                                        "write_key": None, "errror": "invalid write_key"})
                     else:
                         ttl = self._cost_based_ttl(value=value, budget=budget)
                         new_pipe, intent = self._new_page(new_pipe, ndx=ndx, name=name, value=value,
@@ -327,7 +334,8 @@ class MicroServerReader(MicroRedisClient):
                     ignored_ndxs.append(ndx)
 
             if len(executed):
-                new_results = MicroServerConventions.chunker(results=new_pipe.execute(), n=len(executed))
+                new_results = MicroServerConventions.chunker(
+                    results=new_pipe.execute(), n=len(executed))
                 for intent, res in zip(executed, new_results):
                     intent.update({"result": res})
 
@@ -348,7 +356,8 @@ class MicroServerReader(MicroRedisClient):
             for ndx, name, value, write_key, official_write_key, budget in zip(ndxs, names, values, write_keys,
                                                                                official_write_keys, budgets):
                 if write_key == official_write_key:
-                    modify_pipe, intent = self._modify_page(modify_pipe, ndx=ndx, name=name, value=value, budget=budget)
+                    modify_pipe, intent = self._modify_page(
+                        modify_pipe, ndx=ndx, name=name, value=value, budget=budget)
                     intent.update({"ndx": ndx, "write_key": write_key})
                     executed.append(intent)
                 else:
@@ -356,12 +365,15 @@ class MicroServerReader(MicroRedisClient):
                                     "official_write_key_ends_in": official_write_key[-4:],
                                     "error": "write_key does not match page_key on record"}
                     intent = auth_message
-                    error_pipe.lpush(self.errors_name(write_key=write_key), json.dumps(auth_message))
+                    error_pipe.lpush(self.errors_name(write_key=write_key),
+                                     json.dumps(auth_message))
                     error_pipe.expire(self.errors_name(write_key=write_key), self.ERROR_TTL)
-                    error_pipe.ltrim(name=self.errors_name(write_key=write_key), start=0, end=self.ERROR_LIMIT)
+                    error_pipe.ltrim(name=self.errors_name(
+                        write_key=write_key), start=0, end=self.ERROR_LIMIT)
                     rejected.append(intent)
             if len(executed):
-                modify_results = MicroServerConventions.chunker(results=modify_pipe.execute(), n=len(executed))
+                modify_results = MicroServerConventions.chunker(
+                    results=modify_pipe.execute(), n=len(executed))
                 for intent, res in zip(executed, modify_results):
                     intent.update({"result": res})
 
@@ -383,10 +395,12 @@ class MicroServerReader(MicroRedisClient):
             for subscriber in subscribers_set:
                 mailbox_name = self.messages_name(subscriber)
                 propagate_pipe.hset(name=mailbox_name, key=sender_name, value=value)
-                executed.append({"mailbox_name": mailbox_name, "sender": sender_name, "value": value})
+                executed.append({"mailbox_name": mailbox_name,
+                                "sender": sender_name, "value": value})
 
         if len(executed):
-            propagation_results = MicroServerConventions.chunker(results=propagate_pipe.execute(), n=len(executed))
+            propagation_results = MicroServerConventions.chunker(
+                results=propagate_pipe.execute(), n=len(executed))
             for intent, res in zip(executed, propagation_results):
                 intent.update({"result": res})
 
@@ -418,10 +432,12 @@ class MicroServerReader(MicroRedisClient):
             log_names = [self.transactions_name(write_key=write_key),
                          self.transactions_name(write_key=write_key, name=name)]
             for ln in log_names:
-                pipe.xadd(name=ln, fields=transaction_record, maxlen=self.TRANSACTIONS_LIMIT)
+                pipe.xadd(name=ln, fields=transaction_record,
+                          maxlen=self.TRANSACTIONS_LIMIT)
                 pipe.expire(name=ln, time=self._TRANSACTIONS_TTL)
         # Then modify
-        pipe, intent = self._modify_page(pipe=pipe, ndx=ndx, name=name, value=value, budget=budget)
+        pipe, intent = self._modify_page(
+            pipe=pipe, ndx=ndx, name=name, value=value, budget=budget)
         intent.update({"new": True, "write_key": write_key, "value": value})
         return pipe, intent
 
@@ -441,9 +457,12 @@ class MicroServerReader(MicroRedisClient):
         # (1.5) Update the time to live for predictions and samples
         distribution_ttl = self._cost_based_distribution_ttl(budget=budget)
         for delay in self.DELAYS:
-            pipe.expire(name=self._samples_name(name=name, delay=delay), time=distribution_ttl)
-            pipe.expire(name=self._sample_owners_name(name=name, delay=delay), time=distribution_ttl)
-            pipe.expire(name=self._predictions_name(name=name, delay=delay), time=distribution_ttl)
+            pipe.expire(name=self._samples_name(
+                name=name, delay=delay), time=distribution_ttl)
+            pipe.expire(name=self._sample_owners_name(
+                name=name, delay=delay), time=distribution_ttl)
+            pipe.expire(name=self._predictions_name(
+                name=name, delay=delay), time=distribution_ttl)
 
         # (2) Decide how to store: lags, history or neither, but always use exactly six operations
         len_in = len(pipe)
@@ -489,8 +508,10 @@ class MicroServerReader(MicroRedisClient):
         # (4) Construct delay promises
         utc_epoch_now = int(time.time())
         for delay in self.DELAYS:
-            queue = self._promise_queue_name(utc_epoch_now + delay)  # self.PROMISES+str(utc_epoch_now+delay)
-            destination = self.delayed_name(name=name, delay=delay)  # self.DELAYED+str(delay_seconds)+self.SEP+name
+            # self.PROMISES+str(utc_epoch_now+delay)
+            queue = self._promise_queue_name(utc_epoch_now + delay)
+            # self.DELAYED+str(delay_seconds)+self.SEP+name
+            destination = self.delayed_name(name=name, delay=delay)
             promise = self._copy_promise(source=name_of_copy, destination=destination)
             pipe.sadd(queue, promise)
             pipe.expire(name=queue, time=promise_ttl)
@@ -513,7 +534,8 @@ class MicroServerReader(MicroRedisClient):
         write_keys = write_keys or [write_key for _ in names]
         are_valid = self._mauthorize(names, write_keys)
 
-        authorized_kill_list = [name for (name, is_valid_write_key) in zip(names, are_valid) if is_valid_write_key]
+        authorized_kill_list = [name for (name, is_valid_write_key) in zip(
+            names, are_valid) if is_valid_write_key]
         if authorized_kill_list:
             return self._delete_implementation(*authorized_kill_list)
         else:
@@ -559,16 +581,19 @@ class MicroServerReader(MicroRedisClient):
         for name, backlinks in zip(names, backlinks_res):
             for backlink in list(backlinks.keys()):
                 root, delay = self._interpret_delay(backlink)
-                delete_pipe = self._unlink_pipe(pipe=delete_pipe, name=root, delay=int(delay), target=name)
+                delete_pipe = self._unlink_pipe(
+                    pipe=delete_pipe, name=root, delay=int(delay), target=name)
 
         # (b-2) Force subscribers to unsubscribe
         for name, subscribers in zip(names, subscribers_res):
             for subscriber in subscribers:
-                delete_pipe = self._unsubscribe_pipe(pipe=delete_pipe, name=subscriber, source=name)
+                delete_pipe = self._unsubscribe_pipe(
+                    pipe=delete_pipe, name=subscriber, source=name)
 
         # (b-3) Unsubscribe gracefully
         for name, sources in zip(names, subscriptions_res):
-            delete_pipe = self._unsubscribe_pipe(pipe=delete_pipe, name=name, sources=sources)
+            delete_pipe = self._unsubscribe_pipe(
+                pipe=delete_pipe, name=name, sources=sources)
 
         # (b-4) Unlink gracefully
         for name_ndx, name in enumerate(names):
@@ -577,11 +602,13 @@ class MicroServerReader(MicroRedisClient):
                 targets = list(info_exec[link_ndx].keys())
                 if targets:
                     for target in targets:
-                        delete_pipe = self._unlink_pipe(pipe=delete_pipe, name=name, delay=delay, target=target)
+                        delete_pipe = self._unlink_pipe(
+                            pipe=delete_pipe, name=name, delay=delay, target=target)
 
         # (b-5) Then discard derived ... delete can be slow so we expire instead
         for name in names:
-            derived_names = list(self.derived_names(name).values()) + list(self._private_derived_names(name).values())
+            derived_names = list(self.derived_names(name).values()) + \
+                list(self._private_derived_names(name).values())
             for derived_name in derived_names:
                 delete_pipe.pexpire(name=derived_name, time=1)
 
@@ -603,11 +630,10 @@ class MicroServerReader(MicroRedisClient):
     #            Implementation  (touch)
     # --------------------------------------------------------------------------
 
-
-
     def _touch_implementation(self, name, write_key, budget, example_value=3.145):
         """ Extend life of stream """
-        execut = self.client.expire(name=name, time=self._cost_based_ttl(value=example_value, budget=budget))
+        execut = self.client.expire(name=name, time=self._cost_based_ttl(
+            value=example_value, budget=budget))
         self._confirm(write_key=write_key, operation='touch', name=name, execution=execut)
         if not execut:
             self._warn(write_key=write_key, operation='touch', error='expiry not set ... names may not exist',
@@ -640,15 +666,9 @@ class MicroServerReader(MicroRedisClient):
     #            Implementation  (subscribe)
     # --------------------------------------------------------------------------
 
-
-
     # --------------------------------------------------------------------------
     #      Implementation  (Admministrative - garbage collection )
     # --------------------------------------------------------------------------
-
-
-
-
 
     # --------------------------------------------------------------------------
     #            Implementation  (Administrative - promises)
@@ -674,7 +694,8 @@ class MicroServerReader(MicroRedisClient):
 
         # Get them if they exist
         get_pipe = self.client.pipeline()
-        cancellation_queue_name = [promise for promise, exist in zip(candidates, exists) if exists]
+        cancellation_queue_name = [promise for promise,
+                                   exist in zip(candidates, exists) if exists]
         for collection_name in cancellation_queue_name:
             get_pipe.smembers(collection_name)
         cancel_collections = get_pipe.execute()
@@ -686,10 +707,10 @@ class MicroServerReader(MicroRedisClient):
             if self.CANCEL_SEP in cancellation:
                 write_key, horizon = cancellation.split(self.CANCEL_SEP)
                 name, delay = self.split_horizon_name(horizon)
-                self._delete_scenarios_implementation(name=name, write_key=write_key, delay=delay)
+                self._delete_scenarios_implementation(
+                    name=name, write_key=write_key, delay=delay)
 
         return sum(individual_cancellations) if not with_report else {'cancellations': individual_cancellations}
-
 
     # --------------------------------------------------------------------------
     #            Implementation  (prediction and settlement)
@@ -702,20 +723,9 @@ class MicroServerReader(MicroRedisClient):
         predictions = self.empirical_predictions(lagged_values=lagged_values)
         return self._set_scenarios_implementation(name=name, values=predictions, write_key=write_key, delay=delay)
 
-
-
-
-
-
-
-
-
     def get_names(self):
         return list(self.client.smembers(self._NAMES))
 
     @staticmethod
     def _flatten(list_of_lists):
         return [item for sublist in list_of_lists for item in sublist]
-
-
-

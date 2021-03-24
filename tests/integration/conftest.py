@@ -9,4 +9,3 @@ def attribute_client():
     process = create_local_app_process(app=app)
     yield app.test_client()
     kill_local_app_process(process=process)
-

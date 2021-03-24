@@ -49,7 +49,8 @@ class NamingConventions:
         return self.SUBSCRIPTIONS + name
 
     def cdf_name(self, name, delay=None):
-        return self.CDF + name if delay == None else self.CDF + str(delay) + SepConventions.sep() + name
+        return self.CDF + name if delay is None \
+            else self.CDF + str(delay) + SepConventions.sep() + name
 
     def performance_name(self, write_key):
         return self.PERFORMANCE + write_key + '.json'
@@ -65,19 +66,20 @@ class NamingConventions:
 
     @staticmethod
     def is_plain_name(name: str):
-        return NamingConventions.is_valid_name(name) and not "~" in name
+        return NamingConventions.is_valid_name(name) and "~" not in name
 
     @staticmethod
     def is_valid_name(name: str):
         name_regex = re.compile(r'^[-a-zA-Z0-9_~.:]{1,200}\.[json,html]+$', re.IGNORECASE)
-        return (re.match(name_regex, name) is not None) and (not SepConventions.sep() in name)
+        return (
+            re.match(name_regex, name) is not None) and (
+            not SepConventions.sep() in name)
 
     @staticmethod
     def random_name():
         return str(uuid.uuid4()) + '.json'
 
-
-    def zcurve_names(self, names, delays:[int]):
+    def zcurve_names(self, names, delays: [int]):
         znames = list()
         for delay in delays:
             for dim in [1, 2, 3]:
@@ -85,7 +87,6 @@ class NamingConventions:
                 zname = self.zcurve_name(names=name_combinations, delay=delay)
                 znames.append(zname)
         return znames
-
 
     @staticmethod
     def zcurve_name(names: [str], delay: int):
@@ -95,9 +96,10 @@ class NamingConventions:
         clearbase = "~".join([prefix] + basenames + [str(delay)])
         return clearbase + '.json'
 
+
 class LegacyNamingConventions:
 
-    def __init__(self,**kwargs):
+    def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.TRANSACTIONS = "transactions" + SepConventions.sep()
         self.CONFIRMS = "confirms" + SepConventions.sep()
@@ -113,10 +115,11 @@ class LegacyNamingConventions:
     def legacy_warnings_name(self, write_key):
         return self.WARNINGS + write_key + '.json'
 
-    def legacy_transactions_name(self, write_key=None, name=None, delay=None ):
+    def legacy_transactions_name(self, write_key=None, name=None, delay=None):
         """ Convention for names of transactions records """
-        delay     = None if delay is None else str(delay)
-        key_stem  = None if write_key is None else os.path.splitext(write_key)[0]
+        delay = None if delay is None else str(delay)
+        key_stem = None if write_key is None else os.path.splitext(write_key)[0]
         name_stem = None if name is None else os.path.splitext(name)[0]
-        tail = SepConventions.sep().join( [ s for s in [key_stem,delay,name_stem] if s is not None ])
+        tail = SepConventions.sep().join(
+            [s for s in [key_stem, delay, name_stem] if s is not None])
         return self.TRANSACTIONS + tail + '.json'

@@ -31,7 +31,7 @@ def has_nan(obj):
             return False
 
 
-def shorten(obj,num=5):
+def shorten(obj, num=5):
     if isinstance(obj, list):
         return obj[:num]
     elif isinstance(obj, dict):

@@ -1,4 +1,5 @@
-import pymorton, itertools, math
+import pymorton
+import math
 from typing import List
 from predictionserver.futureconventions.statsconventions import StatsConventions
 
@@ -36,7 +37,8 @@ class ZCurveConventions():
             int_prctls = [int(math.floor(p * SCALE)) for p in prctls]
             m1 = pymorton.interleave(*int_prctls)
             if SAFE:
-                int_prctls_back = pymorton.deinterleave2(m1) if dim == 2 else pymorton.deinterleave3(m1)
+                int_prctls_back = pymorton.deinterleave2(
+                    m1) if dim == 2 else pymorton.deinterleave3(m1)
                 assert all(i1 == i2 for i1, i2 in zip(int_prctls, int_prctls_back))
             m2 = pymorton.interleave(*[SCALE - 1 for _ in range(dim)])
             zpercentile = m1 / m2

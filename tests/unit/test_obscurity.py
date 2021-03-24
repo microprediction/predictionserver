@@ -8,6 +8,4 @@ def test_obscurity_init():
     with pytest.raises(Exception):
         obs.obscurity()
     obs.set_obscurity(secret='testing')
-    assert obs.obscurity()=='testing::'
-
-
+    assert obs.obscurity() == 'testing::'

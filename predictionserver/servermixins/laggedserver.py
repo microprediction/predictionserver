@@ -9,34 +9,94 @@ class LaggedServer(LaggedHabits, BaseServer):
         super().__init__(**kwargs)
 
     def get_delayed(self, name, delay=None, delays=None, to_float=True):
-        return self._get_delayed_implementation(name=name, delay=delay, delays=delays, to_float=to_float)
+        return self._get_delayed_implementation(
+            name=name, delay=delay, delays=delays, to_float=to_float)
 
-    def get_lagged(self, name, start=0, end=None, count:int=None, to_float=True):
-        return self._get_lagged_implementation(name, start=start, end=end, count=count, with_values=True,
-                                               with_times=True, to_float=to_float)
+    def get_lagged(self, name, start=0, end=None, count: int = None, to_float=True):
+        return self._get_lagged_implementation(
+            name,
+            start=start,
+            end=end,
+            count=count,
+            with_values=True,
+            with_times=True,
+            to_float=to_float)
 
-    def get_lagged_values_and_times(self, name, start=0, end=None, count:int=None, to_float=True):
-        times, values = self.get_lagged_times_and_values(name=name, start=start, end=end, count=count, to_float=to_float)
+    def get_lagged_values_and_times(
+            self,
+            name,
+            start=0,
+            end=None,
+            count: int = None,
+            to_float=True):
+        times, values = self.get_lagged_times_and_values(
+            name=name, start=start, end=end, count=count, to_float=to_float)
         return values, times
 
-    def get_lagged_times_and_values(self, name, start=0, end=None, count:int=None, to_float=True):
-        return self._get_lagged_implementation(name, start=start, end=end, count=count, with_values=True,
-                                               with_times=True, to_float=to_float, separate=True)
+    def get_lagged_times_and_values(
+            self,
+            name,
+            start=0,
+            end=None,
+            count: int = None,
+            to_float=True):
+        return self._get_lagged_implementation(
+            name,
+            start=start,
+            end=end,
+            count=count,
+            with_values=True,
+            with_times=True,
+            to_float=to_float,
+            separate=True)
 
-    def get_lagged_values(self, name, start=0, end=None, count:int=None, to_float=True):
-        return self._get_lagged_implementation(name, start=start, end=end, count=count, with_values=True,
-                                               with_times=False, to_float=to_float)
+    def get_lagged_values(self, name, start=0, end=None, count: int = None, to_float=True):
+        return self._get_lagged_implementation(
+            name,
+            start=start,
+            end=end,
+            count=count,
+            with_values=True,
+            with_times=False,
+            to_float=to_float)
 
-    def get_lagged_times(self, name, start=0, end=None, count:int=None, to_float=True):
-        return self._get_lagged_implementation(name, start=start, end=end, count=count, with_values=False,
-                                               with_times=True, to_float=to_float)
+    def get_lagged_times(self, name, start=0, end=None, count: int = None, to_float=True):
+        return self._get_lagged_implementation(
+            name,
+            start=start,
+            end=end,
+            count=count,
+            with_values=False,
+            with_times=True,
+            to_float=to_float)
 
-    def get_history(self, name, max='+', min='-', count:int=None, populate=True, drop_expired=True):
+    def get_history(
+            self,
+            name,
+            max='+',
+            min='-',
+            count: int = None,
+            populate=True,
+            drop_expired=True):
         count = count or self._DEFAULT_HISTORY_COUNT
-        return self._get_history_implementation(name=name, max=max, min=min, count=count, populate=populate,
-                                                drop_expired=drop_expired)
+        return self._get_history_implementation(
+            name=name,
+            max=max,
+            min=min,
+            count=count,
+            populate=populate,
+            drop_expired=drop_expired)
 
-    def _get_lagged_implementation(self, name, with_times, with_values, to_float, start=0, end=None, count:int=None, separate=False):
+    def _get_lagged_implementation(
+            self,
+            name,
+            with_times,
+            with_values,
+            to_float,
+            start=0,
+            end=None,
+            count: int = None,
+            separate=False):
         """
         :param separate:    Do you want  lagged_values, lagged_times as two separate lists?
         :return:
@@ -62,7 +122,7 @@ class LaggedServer(LaggedHabits, BaseServer):
         if raw_values and to_float:
             try:
                 values = self.to_float(raw_values)
-            except:
+            except BaseException:
                 values = raw_values
         else:
             values = raw_values
@@ -91,13 +151,14 @@ class LaggedServer(LaggedHabits, BaseServer):
         if to_float:
             try:
                 delayed = self.to_float(delayed)
-            except:
+            except BaseException:
                 pass
         return delayed[0] if singular else delayed
 
     def _get_history_implementation(self, name, min, max, count, populate, drop_expired):
         """ Retrieve history, optionally replacing pointers with actual values  """
-        history = self.client.xrevrange(name=self.HISTORY + name, min=min, max=max, count=count)
+        history = self.client.xrevrange(
+            name=self.HISTORY + name, min=min, max=max, count=count)
         if populate:
             has_pointers = any(self._POINTER in record for record in history)
             if has_pointers and populate:
@@ -116,11 +177,11 @@ class LaggedServer(LaggedHabits, BaseServer):
                             expired.append(k)
 
                 if drop_expired:
-                    history = [h for j, h in enumerate(history) if not j in expired]
+                    history = [h for j, h in enumerate(history) if j not in expired]
         return history
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     from predictionserver.collider_config_private import REDIZ_COLLIDER_CONFIG, FLATHAT_STOAT
     server = LaggedServer()
     server.connect(**REDIZ_COLLIDER_CONFIG)
