@@ -22,15 +22,17 @@ class DonationServer:
         else:
             return [
                 self.animal_from_key(write_key) for write_key in self.client.smembers(
-                    self._donation_name(
-                        len=len))]
+                    self._donation_name(len=len)
+                )
+            ]
 
     def put_donation(self, write_key, password, donor=None, verbose=True):
         self._put_donation_implementation(
             write_key=write_key,
             password=password,
             donor=donor,
-            verbose=verbose)
+            verbose=verbose
+        )
 
     # --------------------------------------------------------------------------
     #            Donations of MUIDs
@@ -47,18 +49,27 @@ class DonationServer:
                     self.client.hincrby(
                         name=self._donors_name(),
                         key=donor.lower(),
-                        amount=importance)
-                return {"operation": "donation",
-                        "success": True,
-                        "message": "Thanks, you can view it at",
-                        "url": self.base_url + "donations/all".replace('//',
-                                                                       '/')} if verbose else 1
+                        amount=importance
+                    )
+                return {
+                    "operation": "donation",
+                    "success": True,
+                    "message": "Thanks, you can view it at",
+                    "url": self.base_url + "donations/all".replace('//', '/')
+                } if verbose else 1
             else:
-                return {"operation": "donation", "success": False,
-                        "message": "Invalid write key or not long enough"} if verbose else 0
+                return {
+                    "operation": "donation",
+                    "success": False,
+                    "message": "Invalid write key or not long enough"
+                } if verbose else 0
         else:
-            return {"operation": "donation", "success": False, "message": "Invalid password",
-                    "hint": "Ends with " + str(official_password[-4:])} if verbose else 0
+            return {
+                "operation": "donation",
+                "success": False,
+                "message": "Invalid password",
+                "hint": "Ends with " + str(official_password[-4:])
+            } if verbose else 0
 
 
 class StandaloneDonationServer(DonationServer, DonationHabits, BaseServer):

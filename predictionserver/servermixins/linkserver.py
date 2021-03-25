@@ -26,12 +26,14 @@ class LinkServer(MemoServer):
             write_key=write_key,
             delay=delay,
             target=target,
-            targets=targets)
+            targets=targets
+        )
 
     def delete_link(self, name, delay, write_key, target):
         """ Permissioned removal of link (either party can do this) """
         return self._delete_link_implementation(
-            name=name, delay=delay, write_key=write_key, target=target)
+            name=name, delay=delay, write_key=write_key, target=target
+        )
 
     # --------------------------------------------------------------------------
     #            Implementation  (linking)
@@ -50,16 +52,18 @@ class LinkServer(MemoServer):
             delays = delays or [delay]
         links = [
             self.client.hgetall(
-                self.links_name(
-                    name=name,
-                    delay=delay)) for delay in delays]
+                self.links_name(name=name, delay=delay)
+            ) for delay in delays
+        ]
         return links[0] if singular else links
 
     def _get_backlinks_implementation(self, name):
         """ Set of links pointing to name """
         return self.client.hgetall(self.backlinks_name(name=name))
 
-    def _set_link_implementation(self, name, write_key, delay, target=None, targets=None):
+    def _set_link_implementation(
+            self, name, write_key, delay, target=None, targets=None
+    ):
         " Create link to possibly non-existent target(s) "
         # TODO: Maybe optimize with a beg for forgiveness patten to avoid two calls
         if targets is None:
@@ -74,15 +78,15 @@ class LinkServer(MemoServer):
             edge_weight = 1.0  # May change in the future
             for target in targets:
                 link_pipe.hset(
-                    self.links_name(
-                        name=name,
-                        delay=delay),
+                    self.links_name(name=name, delay=delay),
                     key=target,
-                    value=edge_weight)
+                    value=edge_weight
+                )
                 link_pipe.hset(
-                    self.backlinks_name(
-                        name=target), key=self.delayed_name(
-                        name=name, delay=delay), value=edge_weight)
+                    self.backlinks_name(name=target),
+                    key=self.delayed_name(name=name, delay=delay),
+                    value=edge_weight
+                )
             exec = link_pipe.execute()
             return sum(exec) / 2
         else:
@@ -90,11 +94,9 @@ class LinkServer(MemoServer):
 
     def _delete_link_implementation(self, name, delay, write_key, target):
         # Either party can unlink
-        if self._authorize(
-                name=name,
-                write_key=write_key) or self._authorize(
-                name=target,
-                write_key=write_key):
+        if self._authorize(name=name, write_key=write_key) or self._authorize(
+                name=target, write_key=write_key
+        ):
             pipe = self.client.pipeline(transaction=True)
             pipe = self.__unlink(pipe=pipe, name=name, delay=delay, target=target)
             exec = pipe.execute()
@@ -113,6 +115,8 @@ class StandaloneLinkServer(LinkServer, BaseServer):
 
 
 if __name__ == '__main__':
-    from predictionserver.collider_config_private import REDIZ_COLLIDER_CONFIG, FLATHAT_STOAT
+    from predictionserver.collider_config_private import (
+        REDIZ_COLLIDER_CONFIG, FLATHAT_STOAT
+    )
     server = StandaloneLinkServer(**REDIZ_COLLIDER_CONFIG)
     print(server.links_name(name='die.json', delay=server.DELAYS[0]))

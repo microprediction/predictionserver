@@ -1,4 +1,3 @@
-from predictionserver.habits import Habits
 from predictionserver.servermixins.baseserver import BaseServer
 
 

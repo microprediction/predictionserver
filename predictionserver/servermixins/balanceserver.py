@@ -17,10 +17,14 @@ class BalanceServer(MemoServer, MetricServer):
             source_write_key,
             recipient_write_key,
             amount=None,
-            verbose=False):
-        return self._put_balance_implementation(source_write_key=source_write_key,
-                                                recipient_write_key=recipient_write_key,
-                                                amount=amount, verbose=verbose)
+            verbose=False
+    ):
+        return self._put_balance_implementation(
+            source_write_key=source_write_key,
+            recipient_write_key=recipient_write_key,
+            amount=amount,
+            verbose=verbose
+        )
 
     def get_reserve(self):
         return float(self.client.hget(self._BALANCES, self._RESERVE()) or 0)
@@ -38,22 +42,26 @@ class BalanceServer(MemoServer, MetricServer):
             source_write_key,
             recipient_write_key,
             amount,
-            verbose=False):
+            verbose=False
+    ):
         """ Debit and credit write_keys """
         allowed = self.key_permission_to_receive(
-            write_key=recipient_write_key) and self.key_permission_to_submit(source_write_key)
+            write_key=recipient_write_key
+        ) and self.key_permission_to_submit(source_write_key)
         give_memo = Memo(
             activity=Activity.give,
             context=ActivityContext.balance,
             counterparty_code=self.shash(recipient_write_key),
             allowed=allowed,
-            success=allowed)
+            success=allowed
+        )
         receive_memo = Memo(
             activity=Activity.receive,
             context=ActivityContext.balance,
             counterparty_code=self.shash(source_write_key),
             allowed=allowed,
-            success=allowed)
+            success=allowed
+        )
         if allowed:
             recipient_balance = self.get_balance(write_key=recipient_write_key)
             if recipient_balance < -1.0:
@@ -76,7 +84,8 @@ class BalanceServer(MemoServer, MetricServer):
                 pipe.hincrbyfloat(
                     name=self._BALANCES,
                     key=recipient_write_key,
-                    amount=given)
+                    amount=given
+                )
                 execution = all([abs(ex) for ex in pipe.execute()])
                 success = execution
                 give_memo.update(
@@ -90,7 +99,9 @@ class BalanceServer(MemoServer, MetricServer):
 
 
 if __name__ == '__main__':
-    from predictionserver.collider_config_private import REDIZ_COLLIDER_CONFIG, FLATHAT_STOAT
+    from predictionserver.collider_config_private import (
+        REDIZ_COLLIDER_CONFIG, FLATHAT_STOAT
+    )
     server = BalanceServer()
     server.connect(**REDIZ_COLLIDER_CONFIG)
     print(server.get_balance(write_key=FLATHAT_STOAT))

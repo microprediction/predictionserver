@@ -1,7 +1,13 @@
-from predictionserver.servermixins.leaderboardserver import LeaderboardServer, LeaderboardGranularity
+from predictionserver.servermixins.leaderboardserver import (
+    LeaderboardServer, LeaderboardGranularity
+)
 from predictionserver.servermixins.scenarioserver import ScenarioServer
-from predictionserver.futureconventions.memoconventions import Memo, MemoCategory, Activity, ActivityContext
-from predictionserver.servermixins.attributeserver import AttributeServer, AttributeGranularity, AttributeType
+from predictionserver.futureconventions.memoconventions import (
+    Memo, Activity, ActivityContext
+)
+from predictionserver.servermixins.attributeserver import (
+    AttributeServer, AttributeGranularity, AttributeType
+)
 from predictionserver.serverhabits.memohabits import PrivateActor
 
 
@@ -25,14 +31,22 @@ class BankruptcyDaemon(LeaderboardServer, ScenarioServer, AttributeServer):
             write_keys.extend(self._get_sample_owners(name=name, delay=delay))
         for write_key in write_keys:
             if self.bankrupt(write_key):
-                notified = self.get_attribute(attribute_type=AttributeType.update,
-                                              granularity=AttributeGranularity.write_key,
-                                              write_key=write_key) or False
+                notified = self.get_attribute(
+                    attribute_type=AttributeType.update,
+                    granularity=AttributeGranularity.write_key,
+                    write_key=write_key
+                ) or False
                 if not notified:
-                    self.set_attribute(attribute_type=AttributeType.update,
-                                       granularity=AttributeGranularity.write_key,
-                                       write_key=write_key, value=1)
-                    message = 'Your write_key is bankrupt. Consider topping it up with put_balance()'
+                    self.set_attribute(
+                        attribute_type=AttributeType.update,
+                        granularity=AttributeGranularity.write_key,
+                        write_key=write_key,
+                        value=1
+                    )
+                    message = (
+                        'Your write_key is bankrupt. Consider topping '
+                        'it up with put_balance()'
+                    )
                     self.add_owner_alert_message(write_key=write_key, message=message)
 
     def admin_bankruptcy_forced_cancellation(self, name, with_report):
@@ -47,7 +61,8 @@ class BankruptcyDaemon(LeaderboardServer, ScenarioServer, AttributeServer):
                 count=10000,
                 name=name,
                 delay=delay,
-                readable=False)
+                readable=False
+            )
             losers = [key for key in write_keys if (self.shash(
                 key) in leaderboard) and (leaderboard[self.shash(key)] < -1.0)]
 
@@ -60,7 +75,8 @@ class BankruptcyDaemon(LeaderboardServer, ScenarioServer, AttributeServer):
                         name=name,
                         code=code,
                         write_key=write_key,
-                        message='Initiating cancellation of submissions due to bankruptcy')
+                        message='Initiating cancellation of submissions due to bankruptcy'
+                    )
                     self.add_memo_as_owner_confirm(memo=memo)
                     self.cancel(name=name, write_key=write_key, delay=delay)
                     discards.append((name, write_key))
@@ -69,8 +85,10 @@ class BankruptcyDaemon(LeaderboardServer, ScenarioServer, AttributeServer):
             activity=Activity.daemon,
             context=ActivityContext.bankruptcy,
             count=len(report_data),
-            data=report_data)
+            data=report_data
+        )
         self.add_memo_as_system_confirm(
             memo=report_memo,
-            private_actor=PrivateActor.bankruptcy_daemon)
+            private_actor=PrivateActor.bankruptcy_daemon
+        )
         return len(discards) if not with_report else report_memo.as_dict()

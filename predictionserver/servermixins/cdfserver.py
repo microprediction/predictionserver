@@ -17,10 +17,10 @@ class CdfServer(CdfHabits, LeaderboardServer):
             delay,
             values: [float] = None,
             top=10,
-            min_balance=-
-            50000000):
+            min_balance=-50000000
+    ):
         """ Retrieve 'x' and 'y' values representing an approximate CDF
-        :param values:   Abscissa for CDF ... if not supplied it will try to figure out something
+        :param values:   Abscissa for CDF ... if not supplied it will figure out something
         :param top:      Number of top participants to use
         :return:  {'x':[float],'y':[float]}
         """
@@ -34,7 +34,8 @@ class CdfServer(CdfHabits, LeaderboardServer):
             delay=delay,
             values=values,
             top=top,
-            min_balance=min_balance)
+            min_balance=min_balance
+        )
 
     # ------------------ #
     #   Implementation   #
@@ -52,29 +53,32 @@ class CdfServer(CdfHabits, LeaderboardServer):
             name=name,
             delay=delay,
             readable=False,
-            count=top)
-        included = [write_key for write_key, balance in lb.items() if balance > min_balance]
+            count=top
+        )
+        included = [
+            write_key for write_key, balance in lb.items() if balance > min_balance
+        ]
         if num:
-            h = min(0.1, max(5.0 / num, 0.00001)) * max([abs(v) for v in values] + [1.0])
+            h = min(0.1, max(5.0 / num, 0.00001)) * max(
+                [abs(v) for v in values] + [1.0]
+            )
             for value in values:
                 score_pipe.zrevrangebyscore(
-                    name=self._predictions_name(
-                        name=name,
-                        delay=delay),
+                    name=self._predictions_name(name=name, delay=delay),
                     max=value,
                     min=value - h,
                     start=0,
                     num=5,
-                    withscores=False)
+                    withscores=False
+                )
                 score_pipe.zrangebyscore(
-                    name=self._predictions_name(
-                        name=name,
-                        delay=delay),
+                    name=self._predictions_name(name=name, delay=delay),
                     min=value,
                     max=value + h,
                     start=0,
                     num=5,
-                    withscores=False)
+                    withscores=False
+                )
 
             execut = score_pipe.execute()
             execut_combined = self.chunker(execut, n=len(values))
@@ -105,11 +109,18 @@ class CdfServer(CdfHabits, LeaderboardServer):
             return {"message": "No predictions."}
 
     def _get_scenarios_implementation(self, name, write_key, delay, cursor=0):
-        """ Charge for this! Not encouraged as it should not be necessary, and it is inefficient to get scenarios back from the collective zset """
+        """
+        Charge for this! Not encouraged as it should not be necessary, and it is
+        inefficient to get scenarios back from the collective zset
+        """
         assert name == self._root_name(name)
         if self.is_valid_key(write_key) and delay in self.DELAYS:
-            cursor, items = self.client.zscan(name=self._predictions_name(
-                name=name, delay=delay), cursor=cursor, match='*' + write_key + '*', count=self.num_predictions)
+            cursor, items = self.client.zscan(
+                name=self._predictions_name(name=name, delay=delay),
+                cursor=cursor,
+                match='*' + write_key + '*',
+                count=self.num_predictions
+            )
             return {"cursor": cursor, "scenarios": dict(items)}
 
 
@@ -120,7 +131,9 @@ class StandaloneCdfServer(CdfServer, LeaderboardServer, BaseServer):
 
 
 if __name__ == '__main__':
-    from predictionserver.collider_config_private import REDIZ_COLLIDER_CONFIG, FLATHAT_STOAT
+    from predictionserver.collider_config_private import (
+        REDIZ_COLLIDER_CONFIG, FLATHAT_STOAT
+    )
     server = StandaloneCdfServer(**REDIZ_COLLIDER_CONFIG)
     lb = server.get_leaderboard(
         granularity=LeaderboardVariety.name_and_delay,

@@ -7,7 +7,9 @@ import math
 from collections import OrderedDict
 from predictionserver.futureconventions.samplers import exponential_bootstrap
 from itertools import zip_longest
-from predictionserver.futureconventions.typeconventions import NameList, Optional, ValueList, KeyList
+from predictionserver.futureconventions.typeconventions import (
+    NameList, Optional, ValueList, KeyList
+)
 from predictionserver.futureconventions.sepconventions import SepConventions
 from typing import Any, List
 from redis.client import list_or_args
@@ -41,7 +43,8 @@ class BaseServer(Habits):
         'max_connections',
         'single_connection_client',
         'health_check_interval',
-        'client_name')
+        'client_name'
+    )
     _FAKE_REDIS_ARGS = ('decode_responses',)
 
     def __init__(self, **kwargs):
@@ -94,12 +97,14 @@ class BaseServer(Habits):
             methods=None,
             transaction=False,
             shard_hint=None,
-            **kwargs):
+            **kwargs
+    ):
         """
-        :param method:             Double underscored method modifying a redis pipeline
-        :param varying_kwargs:     List of arguments to send to the method
-        :param kwargs:             List of arguments broadcast to every method call
-        :param methods:            Optional list of methods. Otherwise assumes the same method is called each time
+        :param method:              Double underscored method modifying a redis pipeline
+        :param varying_kwargs:      List of arguments to send to the method
+        :param kwargs:              List of arguments broadcast to every method call
+        :param methods:             Optional list of methods. Otherwise assumes the same
+                                    method is called each time
         :return: List of execution results
         """
         methods = methods or [method for _ in varying_kwargs]
@@ -111,14 +116,16 @@ class BaseServer(Habits):
         return execution
 
     @staticmethod
-    def coerce_inputs(names: Optional[NameList] = None,
-                      values: Optional[ValueList] = None,
-                      write_keys: Optional[KeyList] = None,
-                      name: Optional[str] = None,
-                      value: Optional[Any] = None,
-                      write_key: Optional[str] = None,
-                      budget: Optional[int] = None,
-                      budgets: Optional[List[int]] = None):
+    def coerce_inputs(
+            names: Optional[NameList] = None,
+            values: Optional[ValueList] = None,
+            write_keys: Optional[KeyList] = None,
+            name: Optional[str] = None,
+            value: Optional[Any] = None,
+            write_key: Optional[str] = None,
+            budget: Optional[int] = None,
+            budgets: Optional[List[int]] = None
+    ):
         # Convention for broadcasting optional singleton inputs to arrays
         names = names or [name]
         values = values or [value for _ in names]
@@ -128,7 +135,9 @@ class BaseServer(Habits):
 
     @staticmethod
     def _descending_values(d):
-        """ Present redis hashes as dict in decending order of value (volumes, leaderboards etc) """
+        """
+        Present redis hashes as dict in decending order of value (volumes, leaderboards)
+        """
         d_tuples = list([(ky, float(val)) for ky, val in d.items()])
         d_tuples.sort(key=lambda t: t[1], reverse=True)
         return OrderedDict(d_tuples)
@@ -161,7 +170,9 @@ class BaseServer(Habits):
 
     @staticmethod
     def chunker(results, n):
-        """ Assumes there are n*k operations and just chunks the results into groups of length k """
+        """
+        Assume there are n*k operations and just chunks the results into groups of length k
+        """
 
         def grouper(iterable, n, fillvalue=None):
             args = [iter(iterable)] * n

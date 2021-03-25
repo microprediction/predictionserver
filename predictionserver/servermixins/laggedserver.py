@@ -10,9 +10,12 @@ class LaggedServer(LaggedHabits, BaseServer):
 
     def get_delayed(self, name, delay=None, delays=None, to_float=True):
         return self._get_delayed_implementation(
-            name=name, delay=delay, delays=delays, to_float=to_float)
+            name=name, delay=delay, delays=delays, to_float=to_float
+        )
 
-    def get_lagged(self, name, start=0, end=None, count: int = None, to_float=True):
+    def get_lagged(
+            self, name, start=0, end=None, count: int = None, to_float=True
+    ):
         return self._get_lagged_implementation(
             name,
             start=start,
@@ -20,26 +23,20 @@ class LaggedServer(LaggedHabits, BaseServer):
             count=count,
             with_values=True,
             with_times=True,
-            to_float=to_float)
+            to_float=to_float
+        )
 
-    def get_lagged_values_and_times(
-            self,
-            name,
-            start=0,
-            end=None,
-            count: int = None,
-            to_float=True):
+    def get_lagged_values_and_times(self,
+            name, start=0, end=None, count: int = None, to_float=True
+    ):
         times, values = self.get_lagged_times_and_values(
-            name=name, start=start, end=end, count=count, to_float=to_float)
+            name=name, start=start, end=end, count=count, to_float=to_float
+        )
         return values, times
 
     def get_lagged_times_and_values(
-            self,
-            name,
-            start=0,
-            end=None,
-            count: int = None,
-            to_float=True):
+            self, name, start=0, end=None, count: int = None, to_float=True
+    ):
         return self._get_lagged_implementation(
             name,
             start=start,
@@ -48,9 +45,12 @@ class LaggedServer(LaggedHabits, BaseServer):
             with_values=True,
             with_times=True,
             to_float=to_float,
-            separate=True)
+            separate=True
+        )
 
-    def get_lagged_values(self, name, start=0, end=None, count: int = None, to_float=True):
+    def get_lagged_values(
+            self, name, start=0, end=None, count: int = None, to_float=True
+    ):
         return self._get_lagged_implementation(
             name,
             start=start,
@@ -58,9 +58,12 @@ class LaggedServer(LaggedHabits, BaseServer):
             count=count,
             with_values=True,
             with_times=False,
-            to_float=to_float)
+            to_float=to_float
+        )
 
-    def get_lagged_times(self, name, start=0, end=None, count: int = None, to_float=True):
+    def get_lagged_times(
+            self, name, start=0, end=None, count: int = None, to_float=True
+    ):
         return self._get_lagged_implementation(
             name,
             start=start,
@@ -68,7 +71,8 @@ class LaggedServer(LaggedHabits, BaseServer):
             count=count,
             with_values=False,
             with_times=True,
-            to_float=to_float)
+            to_float=to_float
+        )
 
     def get_history(
             self,
@@ -77,7 +81,8 @@ class LaggedServer(LaggedHabits, BaseServer):
             min='-',
             count: int = None,
             populate=True,
-            drop_expired=True):
+            drop_expired=True
+    ):
         count = count or self._DEFAULT_HISTORY_COUNT
         return self._get_history_implementation(
             name=name,
@@ -85,7 +90,8 @@ class LaggedServer(LaggedHabits, BaseServer):
             min=min,
             count=count,
             populate=populate,
-            drop_expired=drop_expired)
+            drop_expired=drop_expired
+        )
 
     def _get_lagged_implementation(
             self,
@@ -96,7 +102,8 @@ class LaggedServer(LaggedHabits, BaseServer):
             start=0,
             end=None,
             count: int = None,
-            separate=False):
+            separate=False
+    ):
         """
         :param separate:    Do you want  lagged_values, lagged_times as two separate lists?
         :return:
@@ -182,7 +189,9 @@ class LaggedServer(LaggedHabits, BaseServer):
 
 
 if __name__ == '__main__':
-    from predictionserver.collider_config_private import REDIZ_COLLIDER_CONFIG, FLATHAT_STOAT
+    from predictionserver.collider_config_private import (
+        REDIZ_COLLIDER_CONFIG, FLATHAT_STOAT
+    )
     server = LaggedServer()
     server.connect(**REDIZ_COLLIDER_CONFIG)
     lagged = server.get_lagged(name='die.json')

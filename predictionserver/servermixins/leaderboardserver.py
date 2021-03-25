@@ -1,7 +1,10 @@
-from predictionserver.futureconventions.leaderboardconventions import LeaderboardGranularity
-from predictionserver.futureconventions.memoconventions import Memo, MemoCategory, MemoGranularity
-from predictionserver.futureconventions.activityconventions import Activity, ActivityContext, ActivityPublicity
-from microconventions import Genus
+from predictionserver.futureconventions.leaderboardconventions import (
+    LeaderboardGranularity
+)
+from predictionserver.futureconventions.memoconventions import Memo
+from predictionserver.futureconventions.activityconventions import (
+    Activity, ActivityContext, ActivityPublicity
+)
 from predictionserver.serverhabits.leaderboardhabits import LeaderboardHabits
 from predictionserver.servermixins.ownershipserver import OwnershipServer
 from pprint import pprint
@@ -17,12 +20,13 @@ class LeaderboardServer(LeaderboardHabits, MemoServer):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-    def get_leaderboard(self,
-                        granularity: Union[LeaderboardGranularity,
-                                           str],
-                        count=1200,
-                        with_repos=False,
-                        **kwargs):
+    def get_leaderboard(
+            self,
+            granularity: Union[LeaderboardGranularity, str],
+            count=1200,
+            with_repos=False,
+            **kwargs
+    ):
         """ Retrieve any kind of leaderboard """
         leaderboard_granularity = LeaderboardGranularity[granularity] if isinstance(
             granularity, str) else granularity
@@ -30,12 +34,14 @@ class LeaderboardServer(LeaderboardHabits, MemoServer):
             granularity=leaderboard_granularity,
             count=count,
             with_repos=with_repos,
-            **kwargs)
+            **kwargs
+        )
 
     def leaderboard_authorization(
             self,
             granularity: LeaderboardGranularity,
-            **kwargs) -> bool:
+            **kwargs
+    ) -> bool:
         assert kwargs.get(
             'write_key'), ' Cannot authorize leaderboard operation without write_key'
         if 'name' in str(granularity):
@@ -55,19 +61,23 @@ class LeaderboardServer(LeaderboardHabits, MemoServer):
             context=ActivityContext.leaderboard,
             granularity=granularity,
             allowed=allowed,
-            **kwargs)
+            **kwargs
+        )
         if allowed:
             execution = self._delete_leaderboard_implementation(
-                granularity=granularity, **kwargs)
+                granularity=granularity, **kwargs
+            )
             self.add_memo_as_owner_confirm(memo=memo, execution=execution)
             if execution == 0:
                 self.add_memo_as_owner_warning(
-                    memo=memo, execution=execution, message='Leaderboard did not exist')
+                    memo=memo, execution=execution, message='Leaderboard did not exist'
+                )
         else:
             self.add_memo_as_owner_error(
                 memo=memo,
                 execution=0,
-                message='Did not provide correct write_key associated with the leaderboard')
+                message='Did not provide correct write_key associated with the leaderboard'
+            )
         return memo
 
     def scale_leaderboard(self, granularity: LeaderboardGranularity, **kwargs):
@@ -78,25 +88,34 @@ class LeaderboardServer(LeaderboardHabits, MemoServer):
             context=ActivityContext.leaderboard,
             granularity=granularity,
             allowed=allowed,
-            **kwargs)
+            **kwargs
+        )
         if allowed:
             execution = self._scale_leaderboard_implementation(
-                granularity=granularity, **kwargs)
+                granularity=granularity, **kwargs
+            )
             self.add_memo_as_owner_confirm(memo=memo, execution=execution)
         else:
             self.add_memo_as_owner_error(
                 memo=memo,
                 execution=0,
-                message='Did not provide correct write_key associated with the leaderboard')
+                message=(
+                    'Did not provide correct write_key associated with '
+                    'the leaderboard'
+                )
+            )
         return memo
 
     # -------------- #
     # System usage   #
     # -------------- #
 
-    def __incr_leaderboards_for_horizon(self, pipe, name, delay, payments, multiplier=1.0):
+    def __incr_leaderboards_for_horizon(
+            self, pipe, name, delay, payments, multiplier=1.0
+    ):
         leaderboard_names = self.leaderboard_names_to_update(
-            name=name, delay=delay, sponsor=sponsor)
+            name=name, delay=delay, sponsor=sponsor
+        )
         for (recipient, amount) in payments.items():
             rescaled_amount = multiplier * float(amount)
             for lb in leaderboard_names:
@@ -104,7 +123,8 @@ class LeaderboardServer(LeaderboardHabits, MemoServer):
                     pipe=pipe,
                     leaderboard_name=lb,
                     code=recipient,
-                    amount=rescaled_amount)
+                    amount=rescaled_amount
+                )
         return pipe
 
     def __incr_leaderboard(self, pipe, leaderboard_name, code, amount):
@@ -116,23 +136,20 @@ class LeaderboardServer(LeaderboardHabits, MemoServer):
     def _delete_leaderboard_implementation(self, granularity, name, **kwargs):
         return self.client.delete(
             self.leaderboard_name(
-                leaderboard_granularity=granularity,
-                name=name,
-                **kwargs))
+                leaderboard_granularity=granularity, name=name, **kwargs
+            )
+        )
 
     def _get_leaderboard_implementation(
-            self,
-            granularity,
-            count,
-            readable=True,
-            with_repos=False,
-            **kwargs):
+            self, granularity, count, readable=True, with_repos=False, **kwargs
+    ):
         leaderboard_name = self.leaderboard_name(granularity=granularity, **kwargs)
         return self._get_leaderboard_from_name(
             leaderboard_name=leaderboard_name,
             with_repos=with_repos,
             count=count,
-            readable=readable)
+            readable=readable
+        )
 
     def _get_leaderboard_from_name(self, leaderboard_name, with_repos, count, readable):
         leaderboard = list(
@@ -141,18 +158,29 @@ class LeaderboardServer(LeaderboardHabits, MemoServer):
                     name=leaderboard_name,
                     start=-count,
                     end=-1,
-                    withscores=True)))
+                    withscores=True
+                )
+            )
+        )
         if with_repos:
             return self._get_leaderboard_implementation_with_repos(leaderboard, readable)
-        return OrderedDict([(MicroConventions.animal_from_code(code), score)
-                           for code, score in leaderboard]) if readable else dict(leaderboard)
+        return OrderedDict([
+            (MicroConventions.animal_from_code(code), score)
+            for code, score in leaderboard
+        ]) if readable else dict(leaderboard)
 
     def _get_leaderboard_implementation_with_repos(self, leaderboard, readable):
         hash_to_url_dict = self.client.hgetall(name=self._REPOS)
-        return OrderedDict(
-            [(MicroConventions.animal_from_code(code), (score, hash_to_url_dict.get(code, None)))
-             for code, score in leaderboard]
-        ) if readable else dict([(code, (score, hash_to_url_dict.get(code, None))) for code, score in leaderboard])
+        return OrderedDict([
+            (
+                MicroConventions.animal_from_code(code),
+                (score, hash_to_url_dict.get(code, None))
+            )
+             for code, score in leaderboard
+        ]) if readable else dict([
+            (code, (score, hash_to_url_dict.get(code, None)))
+            for code, score in leaderboard
+        ])
 
     def _copy_leaderboard(self, source, dest):
         self.client.unionstore(dest=dest, keys={source: 1})
@@ -161,7 +189,8 @@ class LeaderboardServer(LeaderboardHabits, MemoServer):
             self,
             granularity: LeaderboardGranularity,
             weight: float,
-            **kwargs):
+            **kwargs
+    ):
         leaderboard_name = self.leaderboard_name(granularity=granularity, **kwargs)
         if leaderboard_name is not None:
             temporary_key = 'temporary_' + \
@@ -183,7 +212,8 @@ class LeaderboardServer(LeaderboardHabits, MemoServer):
         weight = 1. - self.SHRINKAGE
         execution = self._scale_leaderboard_implementation(weight=weight, **kwargs)
         memo = self.add_announcement_of_shrinkage(
-            leaderboard_name=lb_name, execution=execution, weight=weight)
+            leaderboard_name=lb_name, execution=execution, weight=weight
+        )
         return memo
 
 
@@ -197,7 +227,8 @@ class LeaderboardMigrationServer(LeaderboardServer, OwnershipServer, MemoServer)
         new_lb_name = self.leaderboard_name_for_horizon(name=name, delay=delay)
         self.client.zunionstore(dest=new_lb_name, keys={old_lb_name: 1})
         new_retrieved = server.get_leaderboard(
-            granularity=LeaderboardGranularity.name_and_delay, name=name, delay=delay)
+            granularity=LeaderboardGranularity.name_and_delay, name=name, delay=delay
+        )
         pass
 
     def migrate_stream_leaderboard(self, name):
@@ -205,7 +236,8 @@ class LeaderboardMigrationServer(LeaderboardServer, OwnershipServer, MemoServer)
         new_lb_name = self.leaderboard_name_for_horizon(name=name)
         self.client.zunionstore(dest=new_lb_name, keys={old_lb_name: 1})
         new_retrieved = server.get_leaderboard(
-            granularity=LeaderboardGranularity.name, name=name)
+            granularity=LeaderboardGranularity.name, name=name
+        )
         pass
 
     def migrate_sponsored_leaderboard(self, name):
@@ -214,17 +246,22 @@ class LeaderboardMigrationServer(LeaderboardServer, OwnershipServer, MemoServer)
         sponsor = self.shash(write_key=owner)
         old_lb_name = self.old_custom_leaderboard_name(sponsor=sponsor, name=name)
         old_lb = self._get_leaderboard_from_name(
-            leaderboard_name=old_lb_name, with_repos=False, count=5, readable=True)
+            leaderboard_name=old_lb_name, with_repos=False, count=5, readable=True
+        )
         pprint(old_lb)
         genus = self.genus_from_name(name=name)
         new_leaderboard_name = self.leaderboard_name(
-            granularity=LeaderboardGranularity.sponsor_and_genus, sponsor=sponsor, genus=genus)
+            granularity=LeaderboardGranularity.sponsor_and_genus,
+            sponsor=sponsor,
+            genus=genus
+        )
         self.client.zunionstore(dest=new_leaderboard_name, keys={old_lb_name: 1})
         new_retrieved = server.get_leaderboard(
             granularity=LeaderboardGranularity.sponsor_and_genus,
             genus=genus,
             sponsor=sponsor,
-            count=5)
+            count=5
+        )
         pprint(new_retrieved)
 
         # ---------------------------- #
@@ -266,7 +303,9 @@ class LeaderboardMigrationServer(LeaderboardServer, OwnershipServer, MemoServer)
 
 
 if __name__ == '__main__':
-    from predictionserver.collider_config_private import REDIZ_COLLIDER_CONFIG, EMBLOSSOM_MOTH
+    from predictionserver.collider_config_private import (
+        REDIZ_COLLIDER_CONFIG, EMBLOSSOM_MOTH
+    )
     server = LeaderboardMigrationServer(**REDIZ_COLLIDER_CONFIG)
     server.migrate_sponsored_leaderboard(name='btc_eur.json')
     pprint(

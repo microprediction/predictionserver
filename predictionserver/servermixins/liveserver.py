@@ -1,14 +1,10 @@
-from predictionserver.futureconventions.typeconventions import ActivityContext, LoggingCategory, Activity, Memo, Attribute
 from predictionserver.serverhabits.summarizinghabits import SummarizingHabits
-from predictionserver.servermixins.baseserver import BaseServer
-from predictionserver.servermixins.ownershipserver import OwnershipServer
 from microconventions.type_conventions import NameList
-from pprint import pprint
 import json
 from redis.client import list_or_args
 from microconventions.leaderboard_conventions import LeaderboardVariety
 from typing import Optional
-from predictionserver.utilities import stem, has_nan, get_json_safe
+from predictionserver.utilities import stem
 
 
 class LiveServer(SummarizingHabits):
@@ -38,7 +34,9 @@ class LiveServer(SummarizingHabits):
     # ------------------- #
 
     def _get_prefixed_implementation(self, prefixed_name):
-        """ Interpret things like  delayed::15::air-pressure.json cdf::70::air-pressure.json etc """
+        """
+        Interpret things like  delayed::15::air-pressure.json cdf::70::air-pressure.json
+        """
         # Horrid mess. Should move this into conventions
         assert self.SEP in prefixed_name, "Expecting prefixed name with " + self.SEP
         parts = prefixed_name.split(self.SEP)
@@ -74,13 +72,17 @@ class LiveServer(SummarizingHabits):
             elif ps == self.TRANSACTIONS:
                 data = self.get_transactions(write_key=stem(parts[-1]))
             elif ps == self.LEADERBOARD:
-                data = self.get_leaderboard(variety=LeaderboardVariety.name, name=parts[-1])
+                data = self.get_leaderboard(
+                    variety=LeaderboardVariety.name, name=parts[-1]
+                )
             else:
                 data = None
         elif len(parts) == 3:
             ps = parts[0] + self.SEP
             if ps == self.DELAYED:
-                data = self.get_delayed(name=parts[-1], delay=int(parts[1]), to_float=True)
+                data = self.get_delayed(
+                    name=parts[-1], delay=int(parts[1]), to_float=True
+                )
             elif ps in [self._PREDICTIONS, self.PREDICTIONS]:
                 data = self.get_predictions(name=parts[-1], delay=int(parts[1]))
             elif ps in [self._SAMPLES, self.SAMPLES]:
@@ -101,11 +103,11 @@ class LiveServer(SummarizingHabits):
         return data
 
     def _get_implementation(
-            self,
-            name: Optional[str] = None,
-            names: Optional[NameList] = None,
-            **nuissance):
-        """ Retrieve value(s). No permission required. Write_keys or other extraneous arguments ignored. """
+            self, name: Optional[str] = None, names: Optional[NameList] = None, **nuissance
+    ):
+        """
+        Retrieve value(s). No permission required. Write_keys or other extraneous arguments ignored.
+        """
         plural = names is not None
         names = names or [name]
         res = self._pipelined_get(names=names)
@@ -123,7 +125,9 @@ class LiveServer(SummarizingHabits):
 
 
 if __name__ == '__main__':
-    from predictionserver.collider_config_private import REDIZ_COLLIDER_CONFIG, EMBLOSSOM_MOTH
+    from predictionserver.collider_config_private import (
+        REDIZ_COLLIDER_CONFIG, EMBLOSSOM_MOTH
+    )
     server = LiveServer()
     server.connect(**REDIZ_COLLIDER_CONFIG)
     value = server.get('die.json')

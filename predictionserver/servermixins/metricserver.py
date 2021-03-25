@@ -1,4 +1,4 @@
-from predictionserver.serverhabits.metrichabits import MetricHabits, MetricType, MetricGranularity
+from predictionserver.serverhabits.metrichabits import MetricType, MetricGranularity
 from predictionserver.servermixins.memoserver import MemoServer
 from predictionserver.servermixins.ownershipserver import OwnershipServer
 
@@ -17,7 +17,8 @@ class MetricServer(MemoServer, OwnershipServer):
         if granularity is None:
             granularity = self.metric_granularity_inference(**kwargs)
         return self._get_metric_implementation(
-            metric=metric, granularity=granularity, **kwargs)
+            metric=metric, granularity=granularity, **kwargs
+        )
 
     def get_metrics(self, metric: MetricType, granularity: MetricGranularity, **kwargs):
         """ Retrieve entire table """
