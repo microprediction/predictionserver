@@ -1,3 +1,5 @@
+# NOTE: This is no longer being used. Here for archive purposes.
+
 # For testing
 # This is used by conftest.py to set up a local server at the outset of testing
 
