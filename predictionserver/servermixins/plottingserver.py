@@ -49,7 +49,8 @@ class PlottingServer(PlottingHabits):
     def cdf_bar(self, name, delay=None):
         try:
             cdf = self.get_cdf(name=name, delay=int(delay))
-            df = pd.DataFrame({'x': cdf['x'], 'y': cdf['y']})  # creating a sample dataframe
+            # creating a sample dataframe
+            df = pd.DataFrame({'x': cdf['x'], 'y': cdf['y']})
             data = [
                 go.scatter.Line(
                     x=df['x'],
@@ -75,5 +76,5 @@ class StandalonePlottingServer(PlottingServer, LaggedServer, BaseServer):
 
 
 if __name__ == '__main__':
-    from predictionserver.collider_config_private import REDIZ_COLLIDER_CONFIG, FLATHAT_STOAT
+    from predictionserver.collider_config_private import REDIZ_COLLIDER_CONFIG
     server = StandalonePlottingServer(**REDIZ_COLLIDER_CONFIG)

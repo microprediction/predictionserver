@@ -1,4 +1,3 @@
-from predictionserver.serverhabits.linkhabits import LinkHabits
 from predictionserver.servermixins.baseserver import BaseServer
 from predictionserver.servermixins.memoserver import MemoServer
 
@@ -115,8 +114,7 @@ class StandaloneLinkServer(LinkServer, BaseServer):
 
 
 if __name__ == '__main__':
-    from predictionserver.collider_config_private import (
-        REDIZ_COLLIDER_CONFIG, FLATHAT_STOAT
-    )
+    from predictionserver.private.collider_config_private import REDIZ_COLLIDER_CONFIG
+
     server = StandaloneLinkServer(**REDIZ_COLLIDER_CONFIG)
     print(server.links_name(name='die.json', delay=server.DELAYS[0]))

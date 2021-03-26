@@ -3,7 +3,7 @@ from predictionserver.futureconventions.leaderboardconventions import (
 )
 from predictionserver.futureconventions.memoconventions import Memo
 from predictionserver.futureconventions.activityconventions import (
-    Activity, ActivityContext, ActivityPublicity
+    Activity, ActivityContext
 )
 from predictionserver.serverhabits.leaderboardhabits import LeaderboardHabits
 from predictionserver.servermixins.ownershipserver import OwnershipServer
@@ -176,7 +176,7 @@ class LeaderboardServer(LeaderboardHabits, MemoServer):
                 MicroConventions.animal_from_code(code),
                 (score, hash_to_url_dict.get(code, None))
             )
-             for code, score in leaderboard
+            for code, score in leaderboard
         ]) if readable else dict([
             (code, (score, hash_to_url_dict.get(code, None)))
             for code, score in leaderboard
@@ -226,7 +226,7 @@ class LeaderboardMigrationServer(LeaderboardServer, OwnershipServer, MemoServer)
         old_lb_name = self.LEADERBOARD + self.horizon_name(name=name, delay=delay)
         new_lb_name = self.leaderboard_name_for_horizon(name=name, delay=delay)
         self.client.zunionstore(dest=new_lb_name, keys={old_lb_name: 1})
-        new_retrieved = server.get_leaderboard(
+        _ = server.get_leaderboard(
             granularity=LeaderboardGranularity.name_and_delay, name=name, delay=delay
         )
         pass
@@ -235,7 +235,7 @@ class LeaderboardMigrationServer(LeaderboardServer, OwnershipServer, MemoServer)
         old_lb_name = self.LEADERBOARD + name
         new_lb_name = self.leaderboard_name_for_horizon(name=name)
         self.client.zunionstore(dest=new_lb_name, keys={old_lb_name: 1})
-        new_retrieved = server.get_leaderboard(
+        _ = server.get_leaderboard(
             granularity=LeaderboardGranularity.name, name=name
         )
         pass

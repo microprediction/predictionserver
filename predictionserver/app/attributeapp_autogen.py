@@ -1,11 +1,17 @@
 from flask import Flask
-from predictionserver.api.attributeapi import OwnerPrivateAttributeApi,\
-    OwnerPublicAttributeApi, StreamAttributeApi, AttributeApi
+from predictionserver.api.attributeapi import (
+    OwnerPrivateAttributeApi,
+    OwnerPublicAttributeApi,
+    StreamAttributeApi,
+    AttributeApi
+)
 from flask_restx import Namespace, Api
 from predictionserver.app.apimaker import restx_class_maker
 from predictionserver.futureconventions.apiconventions import ApiMethod
-from predictionserver.futureconventions.attributeconventions import AttributeGranularity,\
+from predictionserver.futureconventions.attributeconventions import (
+    AttributeGranularity,
     ATTRIBUTE_GRANULARITY_EXPLANATIONS
+)
 
 
 def create_attribute_app():
@@ -32,10 +38,8 @@ def add_attribute_namespaces(api: Api):
         AttributeGranularity.code,
         AttributeGranularity.name,
     ]
-    docstrings = (
-        [ATTRIBUTE_GRANULARITY_EXPLANATIONS[g] for g in granularities] +
-        [' any attribute ']
-    )
+    docstrings = [ATTRIBUTE_GRANULARITY_EXPLANATIONS[g] for g in granularities] + \
+                 [' any attribute ']
     api_classes = [
         restx_class_maker(api_obj=obj, docstring=docstring, api_methods=api_methods)
         for obj, docstring in zip(objs, docstrings)

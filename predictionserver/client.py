@@ -1,4 +1,4 @@
-from predictionserver.clientmixins.attributereader import AttributeReader
+from predictionserver.servermixins.leaderboardserver import LeaderboardServer
 
 
 class PublishingServer(LeaderboardServer):

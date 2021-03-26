@@ -36,9 +36,11 @@ class PerformanceConventions:
 
 
 if __name__ == '__main__':
-    from predictionserver.collider_config_private import EMBLOSSOM_MOTH
+    from predictionserver.private.collider_config_private import EMBLOSSOM_MOTH
     pc = PerformanceConventions()
     print(
         pc.performance_name(
             granularity=PerformanceGranularity.write_key,
-            write_key=EMBLOSSOM_MOTH))
+            write_key=EMBLOSSOM_MOTH
+        )
+    )

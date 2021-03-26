@@ -106,7 +106,8 @@ class LiveServer(SummarizingHabits):
             self, name: Optional[str] = None, names: Optional[NameList] = None, **nuissance
     ):
         """
-        Retrieve value(s). No permission required. Write_keys or other extraneous arguments ignored.
+        Retrieve value(s). No permission required. Write_keys or other extraneous
+        arguments ignored.
         """
         plural = names is not None
         names = names or [name]
@@ -125,9 +126,8 @@ class LiveServer(SummarizingHabits):
 
 
 if __name__ == '__main__':
-    from predictionserver.collider_config_private import (
-        REDIZ_COLLIDER_CONFIG, EMBLOSSOM_MOTH
-    )
+    from predictionserver.private.collider_config_private import REDIZ_COLLIDER_CONFIG
+
     server = LiveServer()
     server.connect(**REDIZ_COLLIDER_CONFIG)
     value = server.get('die.json')

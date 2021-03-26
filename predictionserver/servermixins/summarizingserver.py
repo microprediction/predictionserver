@@ -1,14 +1,19 @@
-from predictionserver.futureconventions.leaderboardconventions import LeaderboardGranularity
+from predictionserver.futureconventions.leaderboardconventions import (
+    LeaderboardGranularity
+)
 
 
 class SummarizingServer:
 
     def size(self, name):
-        return self._size_implementation(name=name, with_report=False, with_private=True)
+        return self._size_implementation(
+            name=name, with_report=False, with_private=True
+        )
 
     def _size(self, name, with_report=False):  # Move this to diagnostics server
         return self._size_implementation(
-            name=name, with_report=with_report, with_private=True)
+            name=name, with_report=with_report, with_private=True
+        )
 
     def _get_summary_implementation(self, name):
         " Stream summary "
@@ -16,11 +21,15 @@ class SummarizingServer:
         def delay_level(name, delay):
             things = [
                 self.leaderboard_name(
-                    variety=LeaderboardVariety.name_and_delay, name=name, delay=delay), self.delayed_name(
-                    name=name, delay=delay), self.links_name(
-                    name=name, delay=delay)]
-            return dict([(thing, get_json_safe(thing=thing, getter=self.get))
-                        for thing in things])
+                    variety=LeaderboardVariety.name_and_delay, name=name, delay=delay
+                ),
+                self.delayed_name(name=name, delay=delay),
+                self.links_name(name=name, delay=delay)
+            ]
+            return dict([
+                (thing, get_json_safe(thing=thing, getter=self.get))
+                for thing in things
+            ])
 
         def top_level(name):
             things = [
@@ -34,7 +43,8 @@ class SummarizingServer:
                 self.subscribers_name(name),
                 self.subscriptions_name(name),
                 self.history_name(name),
-                self.messages_name(name)]
+                self.messages_name(name)
+            ]
             return dict([(thing, shorten(self.get(thing))) for thing in things])
 
         tl = top_level(name)
@@ -48,31 +58,35 @@ class SummarizingServer:
             things = {
                 'code': self.shash(write_key),
                 'animal': self.animal_from_key(write_key),
-                self.balance_name(
-                    write_key=write_key): self.get_balance(
-                    write_key=write_key),
+                self.balance_name(write_key=write_key): self.get_balance(
+                    write_key=write_key
+                ),
                 'distance_to_bankruptcy': self.distance_to_bankruptcy(
-                    write_key=write_key),
-                '/active/' +
-                write_key: self.get_active(
-                    write_key=write_key),
-                self.performance_name(
-                    write_key=write_key): self.get_performance(
-                    write_key=write_key),
-                self.confirms_name(
-                    write_key=write_key): self.get_confirms(
-                    write_key=write_key),
-                self.errors_name(
-                    write_key=write_key): self.get_errors(
-                    write_key=write_key),
-                self.warnings_name(
-                    write_key=write_key): self.get_warnings(
-                    write_key=write_key),
-                self.transactions_name(
-                    write_key=write_key): self.get_transactions(
-                    write_key=write_key)}
-            return dict([(thing, shorten(value, num=10))
-                        for thing, value in things.items()])
+                    write_key=write_key
+                ),
+                '/active/' + write_key: self.get_active(
+                    write_key=write_key
+                ),
+                self.performance_name(write_key=write_key): self.get_performance(
+                    write_key=write_key
+                ),
+                self.confirms_name(write_key=write_key): self.get_confirms(
+                    write_key=write_key
+                ),
+                self.errors_name(write_key=write_key): self.get_errors(
+                    write_key=write_key
+                ),
+                self.warnings_name(write_key=write_key): self.get_warnings(
+                    write_key=write_key
+                ),
+                self.transactions_name(write_key=write_key): self.get_transactions(
+                    write_key=write_key
+                )
+            }
+            return dict([
+                (thing, shorten(value, num=10))
+                for thing, value in things.items()
+            ])
 
         return top_level(write_key=write_key)
 

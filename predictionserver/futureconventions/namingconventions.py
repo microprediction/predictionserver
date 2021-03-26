@@ -71,9 +71,9 @@ class NamingConventions:
     @staticmethod
     def is_valid_name(name: str):
         name_regex = re.compile(r'^[-a-zA-Z0-9_~.:]{1,200}\.[json,html]+$', re.IGNORECASE)
-        return (
-            re.match(name_regex, name) is not None) and (
-            not SepConventions.sep() in name)
+        return (re.match(name_regex, name) is not None) and (
+            not SepConventions.sep() in name
+        )
 
     @staticmethod
     def random_name():

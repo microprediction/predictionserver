@@ -29,7 +29,7 @@ class BalanceServer(MemoServer, MetricServer):
     def get_reserve(self):
         return float(self.client.hget(self._BALANCES, self._RESERVE()) or 0)
 
-    #-------------- #
+    # ------------- #
     # System usage  #
     # ------------- #
 

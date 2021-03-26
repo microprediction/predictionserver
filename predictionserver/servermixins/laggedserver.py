@@ -26,8 +26,8 @@ class LaggedServer(LaggedHabits, BaseServer):
             to_float=to_float
         )
 
-    def get_lagged_values_and_times(self,
-            name, start=0, end=None, count: int = None, to_float=True
+    def get_lagged_values_and_times(
+            self, name, start=0, end=None, count: int = None, to_float=True
     ):
         times, values = self.get_lagged_times_and_values(
             name=name, start=start, end=end, count=count, to_float=to_float
@@ -189,9 +189,8 @@ class LaggedServer(LaggedHabits, BaseServer):
 
 
 if __name__ == '__main__':
-    from predictionserver.collider_config_private import (
-        REDIZ_COLLIDER_CONFIG, FLATHAT_STOAT
-    )
+    from predictionserver.private.collider_config_private import REDIZ_COLLIDER_CONFIG
+
     server = LaggedServer()
     server.connect(**REDIZ_COLLIDER_CONFIG)
     lagged = server.get_lagged(name='die.json')

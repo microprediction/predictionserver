@@ -1,15 +1,6 @@
 from predictionserver.habits.attributehabits import AttributeHabits
-import sys
-import math
-import time
-import os
-import uuid
-from itertools import zip_longest
-import numpy as np
-from redis.client import list_or_args
-from typing import List, Union, Any, Optional
+from typing import List, Union, Optional
 from microconventions import MicroConventions
-from predictionserver.futureconventions.samplers import exponential_bootstrap
 
 KeyList = List[Optional[str]]
 NameList = List[Optional[str]]

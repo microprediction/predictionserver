@@ -131,12 +131,12 @@ class StandaloneCdfServer(CdfServer, LeaderboardServer, BaseServer):
 
 
 if __name__ == '__main__':
-    from predictionserver.collider_config_private import (
-        REDIZ_COLLIDER_CONFIG, FLATHAT_STOAT
-    )
+    from predictionserver.private.collider_config_private import REDIZ_COLLIDER_CONFIG
+
     server = StandaloneCdfServer(**REDIZ_COLLIDER_CONFIG)
     lb = server.get_leaderboard(
         granularity=LeaderboardVariety.name_and_delay,
         name='die.json',
-        delay=server.DELAYS[0])
+        delay=server.DELAYS[0]
+    )
     pprint(lb)

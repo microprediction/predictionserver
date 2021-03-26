@@ -24,7 +24,8 @@ class MetricServer(MemoServer, OwnershipServer):
         """ Retrieve entire table """
         # Not intended to be exposed
         return self._get_metrics_implementation(
-            metric=metric, granularity=granularity, **kwargs)
+            metric=metric, granularity=granularity, **kwargs
+        )
 
     # ---------------- #
     #  System use      #
@@ -36,20 +37,23 @@ class MetricServer(MemoServer, OwnershipServer):
             metric=metric,
             granularity=granularity,
             amount=amount,
-            **kwargs)
+            **kwargs
+        )
 
     def set_metric(
             self,
             metric: MetricType,
             granularity: MetricGranularity,
             value: float,
-            **kwargs):
-        res = self.execute_one(
+            **kwargs
+    ):
+        _ = self.execute_one(
             method=self._pipe_set_metric,
             metric=metric,
             granularity=granularity,
             value=value,
-            **kwargs)
+            **kwargs
+        )
         return 1
 
     # ----------------------------- #
@@ -57,53 +61,66 @@ class MetricServer(MemoServer, OwnershipServer):
     # ----------------------------- #
 
     def get_stream_metric(self, metric: MetricType, name: str):
-        return self.get_metric(metric=metric, granularity=MetricGranularity.name, name=name)
+        return self.get_metric(
+            metric=metric, granularity=MetricGranularity.name, name=name
+        )
 
     def get_horizon_metric(self, metric: MetricType, name: str, delay: int):
         return self.get_metric(
             metric=metric,
             granularity=MetricGranularity.name_and_delay,
             name=name,
-            delay=delay)
+            delay=delay
+        )
 
     def get_public_owner_metric(self, metric: MetricType, code: str):
-        return self.get_metric(metric=metric, granularity=MetricGranularity.code, code=code)
+        return self.get_metric(
+            metric=metric, granularity=MetricGranularity.code, code=code
+        )
 
     def get_private_owner_metric(self, metric: MetricType, write_key: str):
         return self.get_metric(
             metric=metric,
             granularity=MetricGranularity.write_key,
-            write_key=write_key)
+            write_key=write_key
+        )
 
     def get_stream_budget(self, name: str) -> float:
         return self.get_metric(
             metric=MetricType.budget,
             granularity=MetricGranularity.name,
-            name=name)
+            name=name
+        )
 
     def get_horizon_budget(self, name: str, delay: int) -> float:
-        return self.get_horizon_metric(metric=MetricType.budget, name=name, delay=delay)
+        return self.get_horizon_metric(
+            metric=MetricType.budget, name=name, delay=delay
+        )
 
     def get_horizon_budgets(self) -> float:
         return self.get_metrics(
             granularity=MetricGranularity.name_and_delay,
-            metric=MetricType.budget)
+            metric=MetricType.budget
+        )
 
     def get_stream_volume(self, name):
         return self.get_metric(
             metric=MetricType.volume,
             granularity=MetricGranularity.name,
-            name=name)
+            name=name
+        )
 
     def get_stream_volumes(self):
         return self.get_metrics(
             metric=MetricType.volume,
-            granularity=MetricGranularity.name)
+            granularity=MetricGranularity.name
+        )
 
     def get_stream_budgets(self):
         return self.get_metrics(
             metric=MetricType.budget,
-            granularity=MetricGranularity.name)
+            granularity=MetricGranularity.name
+        )
 
     # --------------- #
     # Implementation  #
@@ -114,7 +131,8 @@ class MetricServer(MemoServer, OwnershipServer):
             method=self._pipe_get_metric,
             metric=metric,
             granularity=granularity,
-            **kwargs)
+            **kwargs
+        )
         return float(raw) if raw is not None else 0
 
     def _get_metrics_implementation(self, metric, granularity, **kwargs):
@@ -122,7 +140,8 @@ class MetricServer(MemoServer, OwnershipServer):
             method=self._pipe_get_metrics,
             metric=metric,
             granularity=granularity,
-            **kwargs)
+            **kwargs
+        )
         return self._descending_values(raw_metrics)
 
     def _pipe_get_metric(
@@ -130,9 +149,11 @@ class MetricServer(MemoServer, OwnershipServer):
             pipe,
             metric: MetricType,
             granularity: MetricGranularity,
-            **kwargs):
+            **kwargs
+    ):
         location, key = self._metric_location_and_key(
-            metric=metric, granularity=granularity, **kwargs)
+            metric=metric, granularity=granularity, **kwargs
+        )
         pipe.hget(name=location, key=key)
         return pipe
 
@@ -141,7 +162,8 @@ class MetricServer(MemoServer, OwnershipServer):
             pipe,
             metric: MetricType,
             granularity: MetricGranularity,
-            **kwargs):
+            **kwargs
+    ):
         location = self.metric_name_strict(metric=metric, granularity=granularity)
         pipe.hgetall(name=location)
         return pipe
@@ -152,9 +174,11 @@ class MetricServer(MemoServer, OwnershipServer):
             metric: MetricType,
             granularity: MetricGranularity,
             value,
-            **kwargs):
+            **kwargs
+    ):
         location, key = self._metric_location_and_key(
-            metric=metric, granularity=granularity, **kwargs)
+            metric=metric, granularity=granularity, **kwargs
+        )
         pipe.hset(name=location, key=key, value=value)
         return pipe
 
@@ -164,8 +188,10 @@ class MetricServer(MemoServer, OwnershipServer):
             metric: MetricType,
             granularity: MetricGranularity,
             amount,
-            **kwargs):
+            **kwargs
+    ):
         location, key = self._metric_location_and_key(
-            metric=metric, granularity=granularity, **kwargs)
+            metric=metric, granularity=granularity, **kwargs
+        )
         pipe.hincrbyfloat(name=location, key=key, amount=amount)
         return pipe
