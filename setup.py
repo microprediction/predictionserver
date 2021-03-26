@@ -1,5 +1,5 @@
 import pathlib
-from setuptools import setup, find_packages
+from setuptools import setup
 
 HERE = pathlib.Path(__file__).parent
 
@@ -22,11 +22,24 @@ setup(
     ],
     packages=["predictionserver"],
     test_suite='pytest',
-    tests_require=['pytest', 'fakeredis','pytest-flask'],
+    tests_require=['pytest', 'fakeredis', 'pytest-flask'],
     include_package_data=True,
-    install_requires=["fakeredis", "getjson", "redis", "sortedcontainers", "numpy",
-                      "pymorton", "scipy", "pathlib","plotly>=4.9.0","muid",
-                      "requests","tdigest","flask","flask-application"],
+    install_requires=[
+        "fakeredis",
+        "getjson",
+        "redis",
+        "sortedcontainers",
+        "numpy",
+        "pymorton",
+        "scipy",
+        "pathlib",
+        "plotly>=4.9.0",
+        "muid",
+        "requests",
+        "tdigest",
+        "flask",
+        "flask-application"
+    ],
     entry_points={
         "console_scripts": [
             "predictionserver=predictionserver.__main__:main",

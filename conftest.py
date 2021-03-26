@@ -19,4 +19,3 @@ def localhost_process():
     app_process = create_local_app_process(app=app)
     yield app_process
     kill_local_app_process(app_process)
-
