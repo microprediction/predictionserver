@@ -46,13 +46,15 @@ class AttributeHabits(AttributeConventions, ObscurityHabits):
         return self.obscurity() + 'attributes' + SepConventions.sep() + \
             str(attribute) + SepConventions.sep() + str(granularity)
 
-    def attribute_key(self,
-                      granularity: Union[AttributeGranularity, str] = None,
-                      write_key=None,
-                      code=None,
-                      name=None,
-                      delay=None,
-                      genus=None):
+    def attribute_key(
+            self,
+            granularity: Union[AttributeGranularity, str] = None,
+            write_key=None,
+            code=None,
+            name=None,
+            delay=None,
+            genus=None
+    ):
         """ Determine attribute key, such as   'f10a7ab1e|310  """
         # It is strongly recommended that one supplies granularity,
         # though it can be implied
@@ -76,7 +78,8 @@ class AttributeHabits(AttributeConventions, ObscurityHabits):
             code=code,
             name=name,
             genus=genus,
-            delay=delay)
+            delay=delay
+        )
 
     def attribute_location_and_key(
             self,
@@ -90,7 +93,8 @@ class AttributeHabits(AttributeConventions, ObscurityHabits):
         return location, key
 
     def attribute_location_by_inference(
-            self, attribute: Union[AttributeType, str], **kwargs):
+            self, attribute: Union[AttributeType, str], **kwargs
+    ):
         """ Implicitly determine attribute hash table name """
         granularity = self.attribute_granularity_inference(**kwargs)
         return self.attribute_location(attribute=attribute, granularity=granularity)

@@ -1,4 +1,3 @@
-from pprint import pprint
 from predictionserver.futureconventions.keyconventions import KeyConventions
 from predictionserver.futureconventions.budgetconventions import BudgetConventions
 from predictionserver.futureconventions.activityconventions import Activity
@@ -14,7 +13,7 @@ def test_init():
 
 def test_init_no_args():
     with pytest.raises(TypeError):
-        kc = BudgetConventions(dog=5)
+        BudgetConventions(dog=5)
 
 
 def test_defaults():

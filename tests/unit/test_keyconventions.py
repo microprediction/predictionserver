@@ -1,8 +1,9 @@
-from pprint import pprint
 from predictionserver.futureconventions.keyconventions import KeyConventions
 from predictionserver.futureconventions.activityconventions import Activity
 import pytest
 from predictionserver.set_config import MICRO_TEST_CONFIG
+
+
 BABLOH_CATTLE = MICRO_TEST_CONFIG['BABLOH_CATTLE']
 
 
@@ -13,7 +14,7 @@ def test_init():
 
 def test_init_no_args():
     with pytest.raises(TypeError):
-        kc = KeyConventions(dog=5)
+        KeyConventions(dog=5)
 
 
 def test_defaults():

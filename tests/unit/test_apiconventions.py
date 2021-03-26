@@ -1,4 +1,6 @@
-from predictionserver.futureconventions.apiconventions import is_api_method_name, ApiMethod, select_api_method
+from predictionserver.futureconventions.apiconventions import (
+    is_api_method_name, ApiMethod, select_api_method
+)
 from predictionserver.api.attributeapi import OwnerPrivateAttributeApi
 
 

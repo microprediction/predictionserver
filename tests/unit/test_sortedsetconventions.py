@@ -1,5 +1,6 @@
-from predictionserver.futureconventions.sortedsetconventions import SortedSetConventions,\
-    SortedSetType, SortedSetNameGranularity, SortedSetKeyGranularity
+from predictionserver.futureconventions.sortedsetconventions import (
+    SortedSetConventions, SortedSetNameGranularity, SortedSetKeyGranularity
+)
 import pytest
 
 
@@ -16,4 +17,4 @@ def test_enum():
 
 
 def test_init():
-    ssc = SortedSetConventions()
+    SortedSetConventions()

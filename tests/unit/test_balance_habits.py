@@ -1,6 +1,5 @@
 from predictionserver.serverhabits.balancehabits import BalanceHabits
 import pytest
-from predictionserver.futureconventions.keyconventions import KeyConventions
 
 
 def test_init():

@@ -19,3 +19,4 @@ def verify_private_file_exists_locally():
 def verify_private_file_not_on_github():
     with pytest.raises(ImportError):
         from predictionserver.private.supposed_to_be_private import should_only_run_locally
+        should_only_run_locally()

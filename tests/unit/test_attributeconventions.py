@@ -1,5 +1,8 @@
-from predictionserver.futureconventions.attributeconventions import AttributeConventions, \
-    ATTRIBUTE_GRANULARITY_EXPLANATIONS, AttributeGranularity
+from predictionserver.futureconventions.attributeconventions import (
+    AttributeConventions,
+    ATTRIBUTE_GRANULARITY_EXPLANATIONS,
+    AttributeGranularity
+)
 from predictionserver.futureconventions.typeconventions import Genus
 import pytest
 
@@ -16,9 +19,11 @@ def test_granularity_inference():
     assert ac.attribute_granularity_inference(
         genus=Genus.trivariate, write_key='bernie') == AttributeGranularity.write_key
     assert ac.attribute_granularity_inference(
-        genus=Genus.trivariate, code='bernie', write_key=None) == AttributeGranularity.code_and_genus
+        genus=Genus.trivariate, code='bernie', write_key=None
+    ) == AttributeGranularity.code_and_genus
     assert ac.attribute_granularity_inference(
-        name='mary.json', delay=6, write_key='nowhere') == AttributeGranularity.name_and_delay
+        name='mary.json', delay=6, write_key='nowhere'
+    ) == AttributeGranularity.name_and_delay
     with pytest.raises(TypeError):
         ac.attribute_granularity_inference()
     with pytest.raises(TypeError):
@@ -28,7 +33,8 @@ def test_granularity_inference():
 
 def test_enum():
     assert AttributeGranularity[str(
-        AttributeGranularity.code_and_genus)] == AttributeGranularity.code_and_genus
+        AttributeGranularity.code_and_genus
+    )] == AttributeGranularity.code_and_genus
     assert AttributeGranularity[str(
         AttributeGranularity.code_and_genus)] == AttributeGranularity.code_and_genus
 
