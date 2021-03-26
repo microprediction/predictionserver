@@ -64,7 +64,7 @@ class MetricReader(MetricConventions, BaseReader):
             granularity=MetricGranularity.name_and_delay,
             name=name,
         )
-        return time.time()-float(latest)
+        return time.time() - float(latest)
 
     def get_stream_budget(self, name: str) -> float:
         return self.get_metric(

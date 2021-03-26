@@ -147,8 +147,8 @@ class BaseServer(Habits):
         names = list_or_args(names, args)
         if any(SepConventions.sep() in name for name in names):
             raise Exception(
-                "Operation attempted with a name that uses " +
-                SepConventions.sep())
+                "Operation attempted with a name that uses " + SepConventions.sep()
+            )
 
     @staticmethod
     def to_float(values):

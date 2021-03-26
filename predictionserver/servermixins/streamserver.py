@@ -12,6 +12,8 @@ import time
 import json
 import numpy as np
 
+from typing import Any
+
 
 class StreamServer(LaggedServer, ScenarioServer):
 
@@ -57,7 +59,7 @@ class StreamServer(LaggedServer, ScenarioServer):
 
     def set(self, name, value, write_key, budget=1.):
         """ Set name=value and initiate clearing, derived zscore market etc """
-        memo = Memo(activity=Activity.set, genre=ActivityContext)
+        _ = Memo(activity=Activity.set, genre=ActivityContext)
         assert MicroServerConventions.is_plain_name(name), "Expecting plain name"
         assert MicroServerConventions.is_valid_key(write_key), "Invalid write_key"
         if not self.permitted_to_set(write_key=write_key):
@@ -280,10 +282,24 @@ class StreamServer(LaggedServer, ScenarioServer):
         Parallel assignment and some knock-on effects of clearing (rewards, derived market)
         """
         ndxs = list(range(len(names)))
-        executed_obscure, rejected_obscure, ndxs, names, values, write_keys = self._pipelined_set_obscure(
+        (
+            executed_obscure,
+            rejected_obscure,
+            ndxs,
+            names,
+            values,
+            write_keys
+        ) = self._pipelined_set_obscure(
             ndxs=ndxs, names=names, values=values, write_keys=write_keys, budgets=budgets
         )
-        executed_new, rejected_new, ndxs, names, values, write_keys = self._pipelined_set_new(
+        (
+            executed_new,
+            rejected_new,
+            ndxs,
+            names,
+            values,
+            write_keys
+        ) = self._pipelined_set_new(
             ndxs=ndxs, names=names, values=values, write_keys=write_keys, budgets=budgets
         )
         executed_existing, rejected_existing = self._pipelined_set_existing(
@@ -340,7 +356,7 @@ class StreamServer(LaggedServer, ScenarioServer):
                             })
                         else:
                             new_name = self.random_name()
-                            ttl = self._cost_based_ttl(value=value, budget=budget)
+                            _ = self._cost_based_ttl(value=value, budget=budget)
                             obscure_pipe, intent = self._new_obscure_page(
                                 pipe=obscure_pipe,
                                 ndx=ndx,
@@ -399,7 +415,7 @@ class StreamServer(LaggedServer, ScenarioServer):
                             "errror": "invalid write_key"
                         })
                     else:
-                        ttl = self._cost_based_ttl(value=value, budget=budget)
+                        _ = self._cost_based_ttl(value=value, budget=budget)
                         new_pipe, intent = self._new_page(
                             new_pipe,
                             ndx=ndx,
@@ -627,8 +643,8 @@ class StreamServer(LaggedServer, ScenarioServer):
                 for _ in range(6):  # Again ... same hack ... insist on (6) operations here
                     pipe.expire(name=name_of_copy, time=promise_ttl)
         len_out = len(pipe)
-        assert len_out - len_in == 6, "Need precisely six operations so parent function can" \
-                                      " chunk pipeline results"
+        assert len_out - len_in == 6, "Need precisely six operations so parent function" \
+                                      " can chunk pipeline results"
 
         # (4) Construct delay promises
         utc_epoch_now = int(time.time())

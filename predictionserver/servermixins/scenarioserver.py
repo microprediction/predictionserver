@@ -357,8 +357,7 @@ class ScenarioServer(MemoServer):
                 set_and_expire_pipe.sadd(promise_queue, promise)  # (3::3)
                 set_and_expire_pipe.expire(
                     name=promise_queue,
-                    time=delay_seconds +
-                    self._DELAY_GRACE
+                    time=delay_seconds + self._DELAY_GRACE
                 )  # (4::3)
                 set_and_expire_pipe.expire(
                     name=individual_predictions_name,
@@ -372,9 +371,10 @@ class ScenarioServer(MemoServer):
 
             def _close(a1, a2):
                 return a1 == a2 or (
-                    isinstance(a1, int)
-                    and a1 > 20
-                    and ((a1 - a2) / self.num_predictions) < 0.05)
+                    isinstance(a1, int) and (
+                        a1 > 20 and (a1 - a2) / self.num_predictions < 0.05
+                    )
+                )
 
             success = all(
                 _close(actual, anticipate)
@@ -690,7 +690,7 @@ class ScenarioServer(MemoServer):
                             except AttributeError:
                                 pass
 
-        settle_exec = pipe.execute()  # No checks here
+        _ = pipe.execute()  # No checks here
 
         result = {"percentiles": percentiles}
 
@@ -718,7 +718,7 @@ class ScenarioServer(MemoServer):
 
                     for selection in selections:
                         selected_names = [names[o] for o in selection]
-                        dim = len(selection)
+                        _ = len(selection)
                         z_budget = self.DERIVED_BUDGET_RATIO * sum(
                             [budgets[o] for o in selection]
                         )
@@ -745,8 +745,9 @@ class ScenarioServer(MemoServer):
             owners_prctls = dict([
                 (self._scenario_owner(s), self._scenario_percentile(s))
                 for s in percentile_scenarios if
-                (self.shash(self._scenario_owner(s)) in included_codes)
-                and self._scenario_percentile(s) < 1
+                self.shash(
+                    self._scenario_owner(s)
+                ) in included_codes and self._scenario_percentile(s) < 1
             ])
         else:
             owners_prctls = dict([

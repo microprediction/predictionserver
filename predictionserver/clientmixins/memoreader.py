@@ -43,7 +43,7 @@ class MemoReader(BaseReader, MemoConventions, KeyConventions):
     # --------------------------- #
 
     def get_memos_old(self, category: MemoCategory, write_key: str):
-        method = str(category)+'s'
+        method = str(category) + 's'
         if method in ['errors', 'warnings', 'confirms', 'transactions']:
             return self.request_get_json(method=method, arg=write_key)
         elif method in ['announcements']:

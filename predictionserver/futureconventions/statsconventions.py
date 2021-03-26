@@ -139,10 +139,9 @@ class StatsConventions:
         for x in xs:
             digest.update(x=x)
         sample_x = [
-            digest.percentile(
-                p *
-                100.) for p in StatsConventions.evenly_spaced_percentiles(
-                num=num)]
+            digest.percentile(p * 100.)
+            for p in StatsConventions.evenly_spaced_percentiles(num=num)
+        ]
         rounded_x = [round(x, ndigits) for x in sample_x]
         unique_x = list(set(rounded_x))
         return unique_x if not as_process else [
@@ -170,8 +169,11 @@ class StatsConventions:
         # See https://gist.github.com/microprediction/ea63388c2bbcfd7623bd9937723565b9
         # for a worked example
         num = len(ys)
-        mij = [[4 * math.pow(-1, i + k) for i in range(k)] + [2] +
-               [0] * (num - k - 1) for k in range(num)]
+        mij = [
+            [
+                4 * math.pow(-1, i + k) for i in range(k)
+            ] + [2] + [0] * (num - k - 1) for k in range(num)
+        ]
         M = np.array(mij)
         pdf = np.matmul(M, ys)
         return list(pdf)

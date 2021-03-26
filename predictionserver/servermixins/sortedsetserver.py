@@ -249,7 +249,7 @@ class SortedSetServer(MemoServer, OwnershipServer):
             shrink_pipe.zunionstore(dest=temporary_key, keys={location: weight})
             shrink_pipe.zunionstore(dest=location, keys={temporary_key: 1})
             shrink_pipe.expire(name=temporary_key, time=1)
-            exec = shrink_pipe.execute()
+            _ = shrink_pipe.execute()
             assert self.add_memo_as_owner_confirm(memo=memo, success=1, execution=1)
         else:
             assert self.add_memo_as_owner_error(memo=memo, success=0, execution=0)

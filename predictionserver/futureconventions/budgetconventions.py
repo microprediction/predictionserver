@@ -106,8 +106,11 @@ class BudgetConventions:
         difficulty = difficulty or self.key_difficulty(write_key=write_key)
         budget_1_difficulty = self.MIN_DIFFICULTIES[Activity.mset]
         return abs(
-            self.bankruptcy_level(difficulty=difficulty) /
-            self.bankruptcy_level(difficulty=budget_1_difficulty)
+            self.bankruptcy_level(
+                difficulty=difficulty
+            ) / self.bankruptcy_level(
+                difficulty=budget_1_difficulty
+            )
         )
 
     def key_permission(

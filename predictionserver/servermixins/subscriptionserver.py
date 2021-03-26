@@ -118,8 +118,7 @@ class StandaloneSubscriptionServer(SubscriptionServer, OwnershipServer, MemoServ
 
 
 if __name__ == '__main__':
-    from predictionserver.collider_config_private import (
-        REDIZ_COLLIDER_CONFIG, EMBLOSSOM_MOTH
-    )
+    from predictionserver.private.collider_config_private import REDIZ_COLLIDER_CONFIG
+
     server = StandaloneSubscriptionServer(**REDIZ_COLLIDER_CONFIG)
     server.get_subscribers(name='die.json')
