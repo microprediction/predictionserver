@@ -5,7 +5,7 @@ class ObscurityHabits:
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self._OBSCURITY = 'not obscure yet'
+        self._OBSCURITY = 'Eric'
 
     def obscurity(self):
         if self._OBSCURITY == "not obscure yet":

@@ -1,9 +1,10 @@
 from flask_restx import reqparse, Resource
+from flask_restx.reqparse import RequestParser
+
 import inspect
 from predictionserver.futureconventions.apiconventions import ApiMethod, select_api_method
 from predictionserver.api.attributeapi import OwnerPrivateAttributeApi
 from functools import partial
-from flask_restx.reqparse import RequestParser
 from predictionserver.futureconventions.apiconventions import api_name_from_obj
 
 # Generate flask-application classes from classes in predictionserver/api
@@ -91,9 +92,9 @@ def make_parser(obj, api_method: ApiMethod):
         for arg in full_spec.args[1:]:
             annotation = full_spec.annotations.get(arg)
             if annotation == str:
-                parser.add_argument(arg, type='str', required=True)
+                parser.add_argument(arg, type=str, required=True)
             elif annotation == float:
-                parser.add_argument(arg, type='float', required=True)
+                parser.add_argument(arg, type=float, required=True)
         return parser
     else:
         return None  # Don't want a parser

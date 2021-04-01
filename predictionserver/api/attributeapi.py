@@ -163,7 +163,7 @@ class OwnerPrivateAttributeApi(AttributeServer):
             verbose=True,
         )
 
-    def api_owner_public_attribute_patch(self):
+    def api_owner_private_attribute_patch(self):
         return "hello world again"
 
 
@@ -213,5 +213,5 @@ class StreamAttributeApi(AttributeServer):
             verbose=True
         )
 
-    def api_owner_public_attribute_patch(self):
+    def api_stream_attribute_patch(self):
         return "hello world again"
