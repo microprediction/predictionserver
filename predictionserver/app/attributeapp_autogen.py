@@ -49,4 +49,3 @@ def add_attribute_namespaces(api: Api):
         ns = Namespace(api_class.__name__)
         api.add_namespace(ns=ns)
         ns.add_resource(api_class, '/')
-    return api

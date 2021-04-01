@@ -15,11 +15,6 @@ from predictionserver.set_config import MICRO_TEST_CONFIG
 from copy import deepcopy
 
 
-import logging
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
-
-
 CONNECTION = deepcopy(MICRO_TEST_CONFIG)
 
 ######################
@@ -146,5 +141,3 @@ def add_attribute_namespaces_manually(api):
     )
     api.add_namespace(ns=stream_attribute_ns)
     stream_attribute_ns.add_resource(StreamAttribute, '/')
-
-    return api
