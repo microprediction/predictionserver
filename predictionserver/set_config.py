@@ -8,10 +8,10 @@ from getjson import getjson
 # Locally you should have a .private.set_env_private that creates the
 # environment variables, or set some other way
 
-# try:
-#     from predictionserver.private.set_env_private import NOTHING_MUCH
-# except Exception:
-#     pass
+try:
+    from predictionserver.private.set_env_private import NOTHING_MUCH
+except Exception:
+    pass
 
 micro_config_url = os.getenv('TEST_CONFIG_URL')
 micro_config_failover_url = os.getenv('TEST_CONFIG_FAILOVER_URL')
