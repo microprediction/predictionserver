@@ -14,10 +14,12 @@ class KeyConventions:
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.MIN_BALANCE = -1
-        self.MIN_DIFFICULTIES = {Activity.set: 12,
-                                 Activity.mset: 13,
-                                 Activity.submit: 8,
-                                 Activity.cset: 12}
+        self.MIN_DIFFICULTIES = {
+            Activity.set: 12,
+            Activity.mset: 13,
+            Activity.submit: 8,
+            Activity.cset: 12
+        }
 
     @staticmethod
     def is_valid_key(write_key):
@@ -33,18 +35,18 @@ class KeyConventions:
         """ Create new write_key (string, not bytes)
 
                 exact - Insist on supplied difficulty.
-                        If exact is not set to True, the key might be higher difficulty than requested
+                        If exact is not set to True, the key might be higher difficulty
+                        than requested
         """
-        assert difficulty<18, "Be realistic!"
+        assert difficulty < 18, "Be realistic!"
         while True:
             write_key = muid.create(difficulty=difficulty).decode()
             if not exact:
                 return write_key
             else:
                 actual_difficulty = KeyConventions.key_difficulty(write_key=write_key)
-                if difficulty==actual_difficulty:
+                if difficulty == actual_difficulty:
                     return write_key
-
 
     @staticmethod
     def animal_from_key(write_key):
@@ -52,9 +54,11 @@ class KeyConventions:
 
     @staticmethod
     def key_difficulty(write_key):
-        """ A measure of key rarity, the difficulty is the length of the memorable part """
+        """
+        A measure of key rarity, the difficulty is the length of the memorable part
+        """
         nml = muid.animal(write_key)
-        return 0 if nml is None else len(nml.replace(' ',''))
+        return 0 if nml is None else len(nml.replace(' ', ''))
 
     @staticmethod
     def shash(write_key):
@@ -83,21 +87,25 @@ class KeyConventions:
                 return report[0]["key"].decode()
 
     @staticmethod
-    def code_from_code_or_key(code_or_key:str)->str:
+    def code_from_code_or_key(code_or_key: str) -> str:
         """ Return hash of key, if key, else return same string """
         if KeyConventions.is_valid_key(code_or_key):
             return KeyConventions.shash(code_or_key)
         elif KeyConventions.animal_from_code(code_or_key):
             return code_or_key
 
-
-    def key_permission(self, activity: Activity, difficulty: int = None, write_key=None) -> bool:
+    def key_permission(
+            self, activity: Activity, difficulty: int = None, write_key=None
+    ) -> bool:
         """ Indicate whether key is difficult enough to permit an activity """
         difficulty = difficulty or self.key_difficulty(write_key=write_key)
         return difficulty >= self.MIN_DIFFICULTIES[activity]
 
-    def permitted(self,**kwargs):
-        logging.warning('KeyConventions.permitted is deprecated. Please use KeyConventions.key_permission.')
+    def permitted(self, **kwargs):
+        logging.warning(
+            'KeyConventions.permitted is deprecated. Please use '
+            'KeyConventions.key_permission.'
+        )
         return self.key_permission(**kwargs)
 
     # ------------------------------------------------------------------------------- #
@@ -105,28 +113,56 @@ class KeyConventions:
     # ------------------------------------------------------------------------------- #
 
     def key_permission_to_set(self, difficulty: int = None, write_key=None):
-        """ Determine whether you or someone else has permission to create stream """
-        return self.permitted(activity=Activity.set, difficulty=difficulty, write_key=write_key)
+        """
+        Determine whether you or someone else has permission to create stream
+        """
+        return self.permitted(
+            activity=Activity.set, difficulty=difficulty, write_key=write_key
+        )
 
     def key_permission_to_submit(self, difficulty: int = None, write_key=None):
-        """ Determine whether you or someone else has permission to create (update) stream """
-        return self.permitted(activity=Activity.submit, difficulty=difficulty, write_key=write_key)
+        """
+        Determine whether you or someone else has permission to create (update) stream
+        """
+        return self.permitted(
+            activity=Activity.submit, difficulty=difficulty, write_key=write_key
+        )
 
     def key_permission_to_mset(self, difficulty: int = None, write_key=None):
-        """ Determine whether you or someone else has permission to create (update) multiple streams  """
-        return self.permitted(activity=Activity.mset, difficulty=difficulty, write_key=write_key)
+        """
+        Determine whether you or someone else has permission to create (update)
+        multiple streams
+        """
+        return self.permitted(
+            activity=Activity.mset, difficulty=difficulty, write_key=write_key
+        )
 
     def key_permission_to_cset(self, difficulty: int = None, write_key=None):
-        """ Determine whether you or someone else has permission to create (update) multiple streams with implied Copulas  """
-        return self.permitted(activity=Activity.mset, difficulty=difficulty, write_key=write_key)
+        """
+        Determine whether you or someone else has permission to create (update)
+        multiple streams with implied Copulas
+        """
+        return self.permitted(
+            activity=Activity.mset, difficulty=difficulty, write_key=write_key
+        )
 
     def key_permission_to_give(self, difficulty: int = None, write_key=None):
-        """ Determine whether you or someone else has permission to transfer some of your balance """
-        return self.permitted(activity=Activity.give, difficulty=difficulty, write_key=write_key)
+        """
+        Determine whether you or someone else has permission to transfer some
+        of your balance
+        """
+        return self.permitted(
+            activity=Activity.give, difficulty=difficulty, write_key=write_key
+        )
 
     def key_permission_to_receive(self, difficulty: int = None, write_key=None):
-        """ Determine whether you or someone else has permission to receive some balance """
-        return self.permitted(activity=Activity.receive, difficulty=difficulty, write_key=write_key)
+        """
+        Determine whether you or someone else has permission to receive some
+        balance
+        """
+        return self.permitted(
+            activity=Activity.receive, difficulty=difficulty, write_key=write_key
+        )
 
     # --------------------- #
     #    Ancestor methods   #
@@ -138,7 +174,10 @@ class KeyConventions:
         try:
             return self.write_key
         except AttributeError:
-            raise AttributeError('KeyConventions.own_write_key only works for derived classes with write_key properties')
+            raise AttributeError(
+                'KeyConventions.own_write_key only works for derived classes '
+                'with write_key properties'
+            )
 
 
 new_key = KeyConventions.create_key

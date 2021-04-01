@@ -7,5 +7,5 @@ def test_attribute_namespaces():
     app = Flask(__name__)
     api = Api(app)
     api = add_attribute_namespaces(api=api)
-    namespace_names = [ ns.name for ns in api.namespaces ]
+    namespace_names = [ns.name for ns in api.namespaces]
     assert 'OwnerPrivateAttribute' in namespace_names

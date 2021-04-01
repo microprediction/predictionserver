@@ -1,8 +1,9 @@
-from predictionserver.futureconventions.typeconventions import StrEnum, Genus, Memory, GranularityEnum
+from predictionserver.futureconventions.typeconventions import (
+    StrEnum, Genus, Memory, GranularityEnum
+)
 from predictionserver.futureconventions.attributeconventions import AttributeType
 from predictionserver.futureconventions.metricconventions import MetricType
 from predictionserver.futureconventions.hashconventions import HashType
-from predictionserver.futureconventions.sepconventions import SepConventions
 from predictionserver.futureconventions.activityconventions import Activity, ActivityContext
 from predictionserver.futureconventions.sortedsetconventions import SortedSetType
 from collections import OrderedDict
@@ -12,8 +13,8 @@ from copy import deepcopy
 import uuid
 
 
-# A memo enforces some consistency on messages used internally and in confirms, warnings, errors
-# and responses to put style requests.
+# A memo enforces some consistency on messages used internally and in confirms,
+# warnings, errors and responses to put style requests.
 
 
 class PublicActor(StrEnum):
@@ -36,59 +37,71 @@ class MemoGranularity(GranularityEnum):
 
 
 class Memo(OrderedDict):
-    _ENUM_FIELDS = ['activity', 'public_actor','private_actor','context','attribute',
-                    'category', 'granularity','genus','hash_type','sortedset_type',
-                    'memory']
-    _SANITIZE_FIELDS = {'write_key':'code','counterparty':'counterparty_code'}
+    _ENUM_FIELDS = [
+        'activity',
+        'public_actor',
+        'private_actor',
+        'context',
+        'attribute',
+        'category',
+        'granularity',
+        'genus',
+        'hash_type',
+        'sortedset_type',
+        'memory',
+    ]
+    _SANITIZE_FIELDS = {'write_key': 'code', 'counterparty': 'counterparty_code'}
 
-    def __init__(self,
-                 memo_id:str=None,
-                 activity: Activity = None,
-                 public_actor: PublicActor=None,
-                 private_actor: str=None,
-                 context: ActivityContext = None,
-                 attribute: AttributeType = None,
-                 metric: MetricType = None,
-                 hash_type: HashType = None,
-                 sortedset_type: SortedSetType = None,
-                 granularity: GranularityEnum = None,
-                 genus: Genus = None,
-                 memory: Memory = None,
-                 epoch_time: float = None,
-                 timestr: str = None,
-                 write_key: str = None,  # Omitted from log
-                 code:str=None,  # Will be clobbered by shash(write_key) when log is written
-                 counterparty_write_key:str=None,  # Omitted from log
-                 counterparty_code: str = None,  # Will be clobbered by shash(counterparty) when log is written
-                 name: str = None,
-                 index: int = None,
-                 delay: int = None,
-                 value=None,
-                 low=None,  # Transaction results ...
-                 high=None,
-                 count=None,
-                 near=None,
-                 avg_near=None,
-                 url: str = None,
-                 success: int = 1,
-                 execution: int = -1,
-                 allowed: int = None,
-                 message: str = None,
-                 text: str = None,
-                 host: str = None,
-                 data: dict = None
-                 ):
+    def __init__(
+            self,
+            memo_id: str = None,
+            activity: Activity = None,
+            public_actor: PublicActor = None,
+            private_actor: str = None,
+            context: ActivityContext = None,
+            attribute: AttributeType = None,
+            metric: MetricType = None,
+            hash_type: HashType = None,
+            sortedset_type: SortedSetType = None,
+            granularity: GranularityEnum = None,
+            genus: Genus = None,
+            memory: Memory = None,
+            epoch_time: float = None,
+            timestr: str = None,
+            write_key: str = None,  # Omitted from log
+            code: str = None,  # Will be clobbered by shash(write_key) when log
+            counterparty_write_key: str = None,  # Omitted from log
+            counterparty_code: str = None,  # Will be clobbered by shash(counterparty)
+            name: str = None,
+            index: int = None,
+            delay: int = None,
+            value=None,
+            low=None,  # Transaction results ...
+            high=None,
+            count=None,
+            near=None,
+            avg_near=None,
+            url: str = None,
+            success: int = 1,
+            execution: int = -1,
+            allowed: int = None,
+            message: str = None,
+            text: str = None,
+            host: str = None,
+            data: dict = None
+    ):
         self._initialized = False
-        super().__init__(memo_id=memo_id, activity=activity, public_actor=public_actor,
-                         private_actor=private_actor, context=context,
-                         attribute=attribute, metric=metric, hash_type=hash_type, sortedset_type=sortedset_type,
-                         granularity=granularity, genus=genus, memory=memory, epoch=epoch_time, timestr=timestr,
-                         write_key=write_key, counterparty=counterparty_write_key,
-                         counterparty_code=counterparty_code, name=name, value=value, delay=delay,
-                         success=success, code=code, execution=execution, url=url,
-                         text=text, index=index, count=count, allowed=allowed,
-                         message=message, host=host, data=data, low=low, high=high,
-                         near=near, avg_near=avg_near)
+        super().__init__(
+            memo_id=memo_id, activity=activity, public_actor=public_actor,
+            private_actor=private_actor, context=context, attribute=attribute,
+            metric=metric, hash_type=hash_type, sortedset_type=sortedset_type,
+            granularity=granularity, genus=genus, memory=memory, epoch=epoch_time,
+            timestr=timestr, write_key=write_key, counterparty=counterparty_write_key,
+            counterparty_code=counterparty_code, name=name, value=value, delay=delay,
+            success=success, code=code, execution=execution, url=url, text=text,
+            index=index, count=count, allowed=allowed, message=message, host=host,
+            data=data, low=low, high=high, near=near, avg_near=avg_near,
+        )
         if self.get('epoch_time') is None:
             self['epoch_time'] = time.time()
         if self.get('timestr') is None:
@@ -106,13 +119,16 @@ class Memo(OrderedDict):
                 if existing_value is None or type(value) == type(existing_value):
                     super().__setitem__(key, value)
                 else:
-                    raise Exception(key + ' is supposed to be type ' + str(type(existing_value)))
+                    raise Exception(
+                        key + ' is supposed to be type ' + str(type(existing_value))
+                    )
         else:
             super().__setitem__(key, value)
 
     def as_dict(self, cast_to_str=True, leave_out_none=True, flatten_data=True):
-        d = OrderedDict([(k, v) for k, v in dict(self).items() if v is not None]) if leave_out_none else OrderedDict(
-            self)
+        d = OrderedDict([
+            (k, v) for k, v in dict(self).items() if v is not None
+        ]) if leave_out_none else OrderedDict(self)
         if cast_to_str:
             for k in self._ENUM_FIELDS:
                 if k in d:

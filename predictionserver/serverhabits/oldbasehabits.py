@@ -1,6 +1,6 @@
 import numpy as np
 from redis.client import list_or_args
-from typing import List, Union, Any, Optional
+from typing import List, Any, Optional
 
 from predictionserver.futureconventions.serverconventions import ServerConventions
 from predictionserver.futureconventions.typeconventions import KeyList, NameList, Value, ValueList, DelayList
@@ -15,26 +15,56 @@ from predictionserver.futureconventions.samplers import exponential_bootstrap
 # conventions destined for microconventions package
 
 BASE_SERVER_CONFIG_ARGS = ('history_len', 'delays', 'lagged_len', 'windows', 'obscurity')
-DEFAULT_CONVENTIONS = {'min_len': 12, 'min_balance': -1, 'delays': [70, 310, 910, 3555], 'num_predictions': 225}
-DEFAULT_TESTING_CONVENTIONS = {'min_len': 12, 'min_balance': -1, 'delays': [1, 5], 'num_predictions': 225}
+DEFAULT_CONVENTIONS = {
+    'min_len': 12,
+    'min_balance': -1,
+    'delays': [
+        70,
+        310,
+        910,
+        3555],
+    'num_predictions': 225}
+DEFAULT_TESTING_CONVENTIONS = {
+    'min_len': 12,
+    'min_balance': -1,
+    'delays': [
+        1,
+        5],
+    'num_predictions': 225}
 
 
 class BaseHabits(ServerConventions):
 
-    def __init__(self, history_len=None, lagged_len=None, max_ttl=None, windows=None, obscurity=None,
-                 min_len=None, min_balance=None, num_predictions=None, delays=None):
+    def __init__(
+            self,
+            history_len=None,
+            lagged_len=None,
+            max_ttl=None,
+            windows=None,
+            obscurity=None,
+            min_len=None,
+            min_balance=None,
+            num_predictions=None,
+            delays=None):
         super().__init__()
 
-        super().__init__(min_len=min_len, min_balance=min_balance, num_predictions=num_predictions, delays=delays)
+        super().__init__(
+            min_len=min_len,
+            min_balance=min_balance,
+            num_predictions=num_predictions,
+            delays=delays)
 
         if windows is None:
             windows = [1e-4, 1e-3, 1e-2]
-        self._WINDOWS = windows  # Sizes of neighbourhoods around truth used in countback ... don't make too big or it hits performance
+        # Sizes of neighbourhoods around truth used in countback ... don't make
+        # too big or it hits performance
+        self._WINDOWS = windows
 
         self.HISTORY_LEN = int(history_len or 1000)
         self.LAGGED_LEN = int(lagged_len or 10000)
-        self.ZDELAYS = [self.DELAYS[0], self.DELAYS[-1]] # Which delays to create z-streams for
-        self.CONFIRMS_MAX = 5# Maximum number of confirmations when using mset()
+        # Which delays to create z-streams for
+        self.ZDELAYS = [self.DELAYS[0], self.DELAYS[-1]]
+        self.CONFIRMS_MAX = 5  # Maximum number of confirmations when using mset()
         self.NOISE = 0.1 / self.num_predictions  # Tie-breaking / smoothing noise added to predictions
         self.NUM_WINNERS = 10  # Maximum number of winning tickets
         self.SHRINKAGE = 0.1  # How much to shrink leaderboards
@@ -58,11 +88,14 @@ class BaseHabits(ServerConventions):
     def assert_not_in_reserved_namespace(names, *args):
         names = list_or_args(names, args)
         if any(self.SEP in name for name in names):
-            raise Exception("Operation attempted with a name that uses " + MicroConventions.sep())
+            raise Exception(
+                "Operation attempted with a name that uses " +
+                MicroConventions.sep())
 
     @staticmethod
     def to_float(values):
-        # Canonical way to convert str or [str] or [[str]] to float equivalent with nan replacing None
+        # Canonical way to convert str or [str] or [[str]] to float equivalent
+        # with nan replacing None
         return np.array(values, dtype=float).tolist()
 
     @staticmethod
@@ -116,9 +149,11 @@ class BaseHabits(ServerConventions):
         # (Note that streams are not supported on fakeredis)
         try:
             record_of_test = {"time": str(time.time())}
-            self.client.xadd(name='e5312d16-dc87-46d7-a2e5-f6a6225e63a5', fields=record_of_test)
+            self.client.xadd(
+                name='e5312d16-dc87-46d7-a2e5-f6a6225e63a5',
+                fields=record_of_test)
             return True
-        except:
+        except BaseException:
             return False
 
     # --------------------------------------------------------------------------
@@ -126,7 +161,8 @@ class BaseHabits(ServerConventions):
     # --------------------------------------------------------------------------
 
     def empirical_predictions(self, lagged_values):
-        predictions = exponential_bootstrap(lagged=lagged_values, decay=0.005, num=self.num_predictions)
+        predictions = exponential_bootstrap(
+            lagged=lagged_values, decay=0.005, num=self.num_predictions)
         return sorted(predictions)
 
     # --------------------------------------------------------------------------
@@ -146,8 +182,9 @@ class BaseHabits(ServerConventions):
 
     def _cost_based_ttl(self, value, budget):
         """ Time to live for name implies a minimal update frequency """
-        return BaseHabits._value_ttl(value=value, budget=budget, num_delays=len(self.DELAYS),
-                                     max_ttl=self._MAX_TTL)
+        return BaseHabits._value_ttl(
+            value=value, budget=budget, num_delays=len(
+                self.DELAYS), max_ttl=self._MAX_TTL)
 
     def _cost_based_distribution_ttl(self, budget):
         """ Time to live for samples ... mostly budget independent """
@@ -165,7 +202,8 @@ class BaseHabits(ServerConventions):
         SECONDS_PER_MONTH = SECONDS_PER_DAY * 30.
         FIXED_COST_bytes = 10  # Overhead
         num_bytes = sys.getsizeof(value)
-        credits_per_month = REPLICATION * BLOAT * (num_bytes + FIXED_COST_bytes) * COST_PER_MONTH_1b
+        credits_per_month = REPLICATION * BLOAT * \
+            (num_bytes + FIXED_COST_bytes) * COST_PER_MONTH_1b
         ttl_seconds = int(math.ceil(SECONDS_PER_MONTH / credits_per_month))
         ttl_seconds = budget * ttl_seconds
         ttl_seconds = min(ttl_seconds, max_ttl)

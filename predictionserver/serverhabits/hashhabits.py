@@ -1,4 +1,6 @@
-from predictionserver.futureconventions.hashconventions import HashType, HashConventions, HashNameGranularity,HashKeyGranularity
+from predictionserver.futureconventions.hashconventions import (
+    HashType, HashConventions, HashNameGranularity, HashKeyGranularity
+)
 from predictionserver.futureconventions.sepconventions import SepConventions
 from predictionserver.serverhabits.obscurityhabits import ObscurityHabits
 from typing import Union
@@ -18,14 +20,18 @@ class HashHabits(HashConventions, ObscurityHabits):
         super().__init__(**kwargs)
         self._HASH = 'hash'
 
-    def hash_location(self, hash_type: Union[HashType, str], name_granularity: Union[HashNameGranularity, str],**kwargs):
+    def hash_location(self,
+                      hash_type: Union[HashType, str],
+                      name_granularity: Union[HashNameGranularity, str],
+                      **kwargs):
         """ Determine hash hash hash name, such as  hash::email::write_key    """
         hash_type = HashType[str(hash_type)]
         name_granularity = HashNameGranularity[str(name_granularity)]
         instance = name_granularity.instance_name(**kwargs)
-        return self.obscurity() + SepConventions.sep().join([self._HASH, str(hash_type), str(name_granularity), instance])
-      
-    def hash_key(self, key_granularity:Union[HashKeyGranularity,str], **kwargs):
+        return self.obscurity() + SepConventions.sep().join(
+            [self._HASH, str(hash_type), str(name_granularity), instance]
+        )
+
+    def hash_key(self, key_granularity: Union[HashKeyGranularity, str], **kwargs):
         key_granularity = HashKeyGranularity[str(key_granularity)]
         return key_granularity.instance_name(**kwargs)
-    

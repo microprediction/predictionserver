@@ -23,5 +23,5 @@ class SortedSetKeyGranularity(GranularityEnum):
 
 class SortedSetConventions:
 
-    def __init__(self,**kwargs):
+    def __init__(self, **kwargs):
         super().__init__(*kwargs)

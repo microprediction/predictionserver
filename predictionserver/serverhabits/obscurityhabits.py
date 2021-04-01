@@ -3,7 +3,7 @@ from predictionserver.futureconventions.sepconventions import SepConventions
 
 class ObscurityHabits:
 
-    def __init__(self,**kwargs):
+    def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self._OBSCURITY = 'not obscure yet'
 
@@ -13,5 +13,5 @@ class ObscurityHabits:
         else:
             return self._OBSCURITY + SepConventions.sep()
 
-    def set_obscurity(self, secret:str):
+    def set_obscurity(self, secret: str):
         self._OBSCURITY = secret

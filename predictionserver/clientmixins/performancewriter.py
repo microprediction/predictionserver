@@ -14,7 +14,7 @@ class PerformanceWriter(AutoConfigure, BaseWriter, KeyConventions):
         return self.request_delete(method='performance', arg=write_key)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     from predictionserver.collider_config_private import EMBLOSSOM_MOTH
     writer = BaseWriter()
-    print(writer.request_delete(method='repository',arg=EMBLOSSOM_MOTH))
+    print(writer.request_delete(method='repository', arg=EMBLOSSOM_MOTH))

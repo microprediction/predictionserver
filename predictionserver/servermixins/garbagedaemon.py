@@ -33,5 +33,7 @@ class GarbageDaemon(MemoServer, OwnershipServer):
                     exists_pipe.stream_exists(name)
                 exists = exists_pipe.execute()
 
-                orphans = [name for name, ex in zip(unique_random_names, exists) if not (ex)]
+                orphans = [
+                    name for name, ex in zip(unique_random_names, exists) if not ex
+                ]
                 return orphans

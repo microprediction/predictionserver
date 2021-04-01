@@ -3,7 +3,8 @@ from predictionserver.servermixins.baseserver import BaseServer
 from collections import OrderedDict
 
 
-# Ownership server has the limited responsibility of tracking the official owners of each stream
+# Ownership server has the limited responsibility of tracking the
+# official owners of each stream
 #
 # Terminology:
 #   - sponsor            refers to public identity (code, the shash of the write_key)
@@ -74,7 +75,9 @@ class OwnershipServer(BaseServer):
 
 
 if __name__ == '__main__':
-    from predictionserver.collider_config_private import REDIZ_COLLIDER_CONFIG, EMBLOSSOM_MOTH
+    from predictionserver.collider_config_private import (
+        REDIZ_COLLIDER_CONFIG, EMBLOSSOM_MOTH
+    )
 
     server = OwnershipServer(**REDIZ_COLLIDER_CONFIG)
     assert server._authority(name='c5_ripple.json') == EMBLOSSOM_MOTH

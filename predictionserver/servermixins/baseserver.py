@@ -7,7 +7,9 @@ import math
 from collections import OrderedDict
 from predictionserver.futureconventions.samplers import exponential_bootstrap
 from itertools import zip_longest
-from predictionserver.futureconventions.typeconventions import NameList, Optional, ValueList, KeyList
+from predictionserver.futureconventions.typeconventions import (
+    NameList, Optional, ValueList, KeyList
+)
 from predictionserver.futureconventions.sepconventions import SepConventions
 from typing import Any, List
 from redis.client import list_or_args
@@ -16,10 +18,33 @@ import numpy as np
 
 class BaseServer(Habits):
     _PY_REDIS_ARGS = (
-        'host', 'port', 'db', 'username', 'password', 'socket_timeout', 'socket_keepalive', 'socket_keepalive_options',
-        'connection_pool', 'unix_socket_path', 'encoding', 'encoding_errors', 'charset', 'errors',
-        'decode_responses', 'retry_on_timeout', 'ssl', 'ssl_keyfile', 'ssl_certfile', 'ssl_cert_reqs', 'ssl_ca_certs',
-        'ssl_check_hostname', 'max_connections', 'single_connection_client', 'health_check_interval', 'client_name')
+        'host',
+        'port',
+        'db',
+        'username',
+        'password',
+        'socket_timeout',
+        'socket_keepalive',
+        'socket_keepalive_options',
+        'connection_pool',
+        'unix_socket_path',
+        'encoding',
+        'encoding_errors',
+        'charset',
+        'errors',
+        'decode_responses',
+        'retry_on_timeout',
+        'ssl',
+        'ssl_keyfile',
+        'ssl_certfile',
+        'ssl_cert_reqs',
+        'ssl_ca_certs',
+        'ssl_check_hostname',
+        'max_connections',
+        'single_connection_client',
+        'health_check_interval',
+        'client_name'
+    )
     _FAKE_REDIS_ARGS = ('decode_responses',)
 
     def __init__(self, **kwargs):
@@ -31,8 +56,9 @@ class BaseServer(Habits):
         self._DEFAULT_MODEL_STD = 1.0  # Noise added for self-prediction
         self._MAX_TTL = 96 * 60 * 60  # Maximum TTL, useful for testing
         self._CREATE_COST = 500  # How much one is charged when creating a new stream
-        self._WINDOWS = [1e-4, 1e-3,
-                         1e-2]  # Sizes of neighbourhoods around truth used in countback ... don't make too big or it hits performance
+        # Sizes of neighbourhoods around truth used in countback ... don't make
+        # too big or it hits performance
+        self._WINDOWS = [1e-4, 1e-3, 1e-2]
         self.HISTORY_LEN = 1000
         self.LAGGED_LEN = 10000
         self.CONFIRMS_MAX = 5  # Maximum number of confirmations when using mset()
@@ -64,12 +90,21 @@ class BaseServer(Habits):
         execution = pipe.execute()
         return execution[0]
 
-    def execute_many(self, method, varying_kwargs: [dict], methods=None, transaction=False, shard_hint=None, **kwargs):
+    def execute_many(
+            self,
+            method,
+            varying_kwargs: [dict],
+            methods=None,
+            transaction=False,
+            shard_hint=None,
+            **kwargs
+    ):
         """
-        :param method:             Double underscored method modifying a redis pipeline
-        :param varying_kwargs:     List of arguments to send to the method
-        :param kwargs:             List of arguments broadcast to every method call
-        :param methods:            Optional list of methods. Otherwise assumes the same method is called each time
+        :param method:              Double underscored method modifying a redis pipeline
+        :param varying_kwargs:      List of arguments to send to the method
+        :param kwargs:              List of arguments broadcast to every method call
+        :param methods:             Optional list of methods. Otherwise assumes the same
+                                    method is called each time
         :return: List of execution results
         """
         methods = methods or [method for _ in varying_kwargs]
@@ -81,14 +116,16 @@ class BaseServer(Habits):
         return execution
 
     @staticmethod
-    def coerce_inputs(names: Optional[NameList] = None,
-                      values: Optional[ValueList] = None,
-                      write_keys: Optional[KeyList] = None,
-                      name: Optional[str] = None,
-                      value: Optional[Any] = None,
-                      write_key: Optional[str] = None,
-                      budget: Optional[int] = None,
-                      budgets: Optional[List[int]] = None):
+    def coerce_inputs(
+            names: Optional[NameList] = None,
+            values: Optional[ValueList] = None,
+            write_keys: Optional[KeyList] = None,
+            name: Optional[str] = None,
+            value: Optional[Any] = None,
+            write_key: Optional[str] = None,
+            budget: Optional[int] = None,
+            budgets: Optional[List[int]] = None
+    ):
         # Convention for broadcasting optional singleton inputs to arrays
         names = names or [name]
         values = values or [value for _ in names]
@@ -98,7 +135,9 @@ class BaseServer(Habits):
 
     @staticmethod
     def _descending_values(d):
-        """ Present redis hashes as dict in decending order of value (volumes, leaderboards etc) """
+        """
+        Present redis hashes as dict in decending order of value (volumes, leaderboards)
+        """
         d_tuples = list([(ky, float(val)) for ky, val in d.items()])
         d_tuples.sort(key=lambda t: t[1], reverse=True)
         return OrderedDict(d_tuples)
@@ -107,11 +146,14 @@ class BaseServer(Habits):
     def assert_not_in_reserved_namespace(names, *args):
         names = list_or_args(names, args)
         if any(SepConventions.sep() in name for name in names):
-            raise Exception("Operation attempted with a name that uses " + SepConventions.sep())
+            raise Exception(
+                "Operation attempted with a name that uses " + SepConventions.sep()
+            )
 
     @staticmethod
     def to_float(values):
-        # Canonical way to convert str or [str] or [[str]] to float equivalent with nan replacing None
+        # Canonical way to convert str or [str] or [[str]] to float equivalent
+        # with nan replacing None
         return np.array(values, dtype=float).tolist()
 
     def _root_name(self, name):
@@ -128,7 +170,9 @@ class BaseServer(Habits):
 
     @staticmethod
     def chunker(results, n):
-        """ Assumes there are n*k operations and just chunks the results into groups of length k """
+        """
+        Assume there are n*k operations and just chunks the results into groups of length k
+        """
 
         def grouper(iterable, n, fillvalue=None):
             args = [iter(iterable)] * n
@@ -154,7 +198,11 @@ class BaseServer(Habits):
 
     def _cost_based_ttl(self, budget, value):
         """ Time to live for name implies a minimal update frequency """
-        return self._value_ttl(value=value, budget=budget, num_delays=5, max_ttl=self._MAX_TTL)
+        return self._value_ttl(
+            value=value,
+            budget=budget,
+            num_delays=5,
+            max_ttl=self._MAX_TTL)
 
     def _cost_based_distribution_ttl(self, budget):
         """ Time to live for samples ... mostly budget independent """
@@ -172,7 +220,8 @@ class BaseServer(Habits):
         SECONDS_PER_MONTH = SECONDS_PER_DAY * 30.
         FIXED_COST_bytes = 10  # Overhead
         num_bytes = sys.getsizeof(value)
-        credits_per_month = REPLICATION * BLOAT * (num_bytes + FIXED_COST_bytes) * COST_PER_MONTH_1b
+        credits_per_month = REPLICATION * BLOAT * \
+            (num_bytes + FIXED_COST_bytes) * COST_PER_MONTH_1b
         ttl_seconds = int(math.ceil(SECONDS_PER_MONTH / credits_per_month))
         ttl_seconds = budget * ttl_seconds
         ttl_seconds = min(ttl_seconds, max_ttl)
@@ -187,9 +236,11 @@ class BaseServer(Habits):
         # (Note that streams are not supported on fakeredis)
         try:
             record_of_test = {"time": str(time.time())}
-            self.client.xadd(name='e5312d16-dc87-46d7-a2e5-f6a6225e63a5', fields=record_of_test)
+            self.client.xadd(
+                name='e5312d16-dc87-46d7-a2e5-f6a6225e63a5',
+                fields=record_of_test)
             return True
-        except:
+        except BaseException:
             return False
 
     # --------------------------------------------------------------------------
@@ -198,5 +249,6 @@ class BaseServer(Habits):
     # Used by the sponsor of a stream
 
     def empirical_predictions(self, lagged_values):
-        predictions = exponential_bootstrap(lagged=lagged_values, decay=0.005, num=self.NUM_PREDICTIONS)
+        predictions = exponential_bootstrap(
+            lagged=lagged_values, decay=0.005, num=self.NUM_PREDICTIONS)
         return sorted(predictions)

@@ -60,4 +60,3 @@ def kill_local_app_process(process, timeout=5):
     if nice_kill(process):
         return
     ugly_kill(process)
-

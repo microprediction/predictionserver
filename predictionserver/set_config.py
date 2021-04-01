@@ -2,12 +2,15 @@ import os
 from sys import platform
 from getjson import getjson
 
+
 # Load a couple of environment variables for local testing.
 # These are secrets on github.
-# Locally you should have a .private.set_env_private that creates the environment variables, or set some other way
+# Locally you should have a .private.set_env_private that creates the
+# environment variables, or set some other way
+
 try:
     from predictionserver.private.set_env_private import NOTHING_MUCH
-except:
+except Exception:
     pass
 
 micro_config_url = os.getenv('TEST_CONFIG_URL')

@@ -13,7 +13,9 @@ class BaseWriter(AutoConfigure, KeyConventions):
         """ Canonical way to call API methods using requests library """
         try:
             if params is not None:
-                res = requests.delete(self.base_url + '/' + method + '/' + arg, params=params)
+                res = requests.delete(
+                    self.base_url + '/' + method + '/' + arg, params=params
+                )
             elif arg is not None:
                 res = requests.delete(self.base_url + '/' + method + '/' + arg)
             elif params is None and arg is None:
@@ -42,7 +44,7 @@ class BaseWriter(AutoConfigure, KeyConventions):
                 raise e
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     from predictionserver.collider_config_private import EMBLOSSOM_MOTH
     writer = BaseWriter()
-    print(writer.request_delete(method='repository',arg=EMBLOSSOM_MOTH))
+    print(writer.request_delete(method='repository', arg=EMBLOSSOM_MOTH))

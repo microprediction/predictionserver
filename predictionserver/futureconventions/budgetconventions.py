@@ -3,7 +3,6 @@ import time
 from muid.mining import mine_once
 from predictionserver.futureconventions.activityconventions import Activity
 from predictionserver.futureconventions.keyconventions import KeyConventions
-import logging
 
 
 class BudgetConventions:
@@ -11,10 +10,12 @@ class BudgetConventions:
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.MIN_BALANCE = -1
-        self.MIN_DIFFICULTIES = {Activity.set: 12,
-                                 Activity.mset: 13,
-                                 Activity.submit: 8,
-                                 Activity.cset: 12}
+        self.MIN_DIFFICULTIES = {
+            Activity.set: 12,
+            Activity.mset: 13,
+            Activity.submit: 8,
+            Activity.cset: 12,
+        }
 
     @staticmethod
     def is_valid_key(write_key):
@@ -27,21 +28,22 @@ class BudgetConventions:
 
     @staticmethod
     def create_key(difficulty=8, exact=False):
-        """ Create new write_key (string, not bytes)
-
-                exact - Insist on supplied difficulty.
-                        If exact is not set to True, the key might be higher difficulty than requested
         """
-        assert difficulty<18, "Be realistic!"
+        Create new write_key (string, not bytes)
+
+            exact - Insist on supplied difficulty.
+                    If exact is not set to True, the key might be higher difficulty
+                    than requested
+        """
+        assert difficulty < 18, "Be realistic!"
         while True:
             write_key = muid.create(difficulty=difficulty).decode()
             if not exact:
                 return write_key
             else:
                 actual_difficulty = KeyConventions.key_difficulty(write_key=write_key)
-                if difficulty==actual_difficulty:
+                if difficulty == actual_difficulty:
                     return write_key
-
 
     @staticmethod
     def animal_from_key(write_key):
@@ -49,9 +51,11 @@ class BudgetConventions:
 
     @staticmethod
     def key_difficulty(write_key):
-        """ A measure of key rarity, the difficulty is the length of the memorable part """
+        """
+        A measure of key rarity, the difficulty is the length of the memorable part
+        """
         nml = muid.animal(write_key)
-        return 0 if nml is None else len(nml.replace(' ',''))
+        return 0 if nml is None else len(nml.replace(' ', ''))
 
     @staticmethod
     def shash(write_key):
@@ -80,7 +84,7 @@ class BudgetConventions:
                 return report[0]["key"].decode()
 
     @staticmethod
-    def code_from_code_or_key(code_or_key:str)->str:
+    def code_from_code_or_key(code_or_key: str) -> str:
         """ Return hash of key, if key, else return same string """
         if KeyConventions.is_valid_key(code_or_key):
             return KeyConventions.shash(code_or_key)
@@ -95,13 +99,23 @@ class BudgetConventions:
             return -0.001
         return -1.0 * (abs(self.MIN_BALANCE) * (16 ** (difficulty - 9)))
 
-    def maximum_stream_budget(self, difficulty:int=None, write_key:str=None) -> float:
+    def maximum_stream_budget(
+            self, difficulty: int = None, write_key: str = None
+    ) -> float:
         """ Default stream budget, and also maximum budget for yourself or someone else """
         difficulty = difficulty or self.key_difficulty(write_key=write_key)
         budget_1_difficulty = self.MIN_DIFFICULTIES[Activity.mset]
-        return abs(self.bankruptcy_level(difficulty=difficulty) / self.bankruptcy_level(difficulty=budget_1_difficulty))
+        return abs(
+            self.bankruptcy_level(
+                difficulty=difficulty
+            ) / self.bankruptcy_level(
+                difficulty=budget_1_difficulty
+            )
+        )
 
-    def key_permission(self, activity: Activity, difficulty: int = None, write_key=None) -> bool:
+    def key_permission(
+            self, activity: Activity, difficulty: int = None, write_key=None
+    ) -> bool:
         """ Indicate whether key is difficult enough to permit an activity """
         difficulty = difficulty or self.key_difficulty(write_key=write_key)
         return difficulty >= self.MIN_DIFFICULTIES[activity]
@@ -117,18 +131,23 @@ class BudgetConventions:
         try:
             return self.get_balance(write_key=write_key)
         except AttributeError:
-            raise AttributeError('KeyConventions.own_write_key only works for derived classes with write_key method')
+            raise AttributeError(
+                'KeyConventions.own_write_key only works for derived classes '
+                'with write_key method.'
+            )
 
     # ---------------------------------------------------------------------------------#
     #    Things that will only work when used in a derived class that has get_balance  #
-    #----------------------------------------------------------------------------------#
+    # ---------------------------------------------------------------------------------#
 
     def bankrupt(self, write_key: str = None) -> bool:
         """ Bankruptcy indicator for one's self, or someone else's write key """
         write_key = write_key or self.own_write_key()
         return self.distance_to_bankruptcy(write_key=write_key) < 0
 
-    def distance_to_bankruptcy(self, balance: float = None, level: float = None, write_key: str = None) -> float:
+    def distance_to_bankruptcy(
+            self, balance: float = None, level: float = None, write_key: str = None
+    ) -> float:
         """ Own distance to bankruptcy, or someone else's """
         if balance is None:
             write_key = write_key or self.own_write_key()

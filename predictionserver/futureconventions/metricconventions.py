@@ -1,12 +1,15 @@
 from predictionserver.futureconventions.sepconventions import SepConventions
-from predictionserver.futureconventions.typeconventions import GranularityEnum, StrEnum
+from predictionserver.futureconventions.typeconventions import (
+    GranularityEnum, StrEnum
+)
 from typing import Union
 
 # Metrics are system incremented floats stored in hashes that track basic
 # rolling statistics, and some advanced ones, by horizons and by participant
 
-# Example:   metric::latest::code              stores most recent interactions by public identifier 'f107ab1e...'
-#            metric::volume::name_and_delay    stores volumes keyed as '<streamname>|310'
+# Example:   metric::latest::code               stores most recent interactions
+#                                               by public identifier 'f107ab1e...'
+#            metric::volume::name_and_delay     stores volumes keyed as '<streamname>|310'
 
 
 class MetricType(StrEnum):
@@ -29,7 +32,7 @@ class MetricGranularity(GranularityEnum):
 
 class MetricConventions:
 
-    def __init__(self,**kwargs):
+    def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.METRICS = 'metrics' + SepConventions.sep()
 
@@ -37,14 +40,29 @@ class MetricConventions:
         """ Preferred way to reference name of hash storing a kind of metric """
         return self.METRICS + str(metric) + SepConventions.sep() + str(granularity)
 
-    def metric_name(self, metric: Union[MetricType, str], code=None, name=None, delay=None, genus=None):
+    def metric_name(
+            self,
+            metric: Union[MetricType, str],
+            code=None,
+            name=None,
+            delay=None,
+            genus=None,
+    ):
         """ Alternative method, where granularity is implicit """
         metric = MetricType[str(metric)]
-        granularity = self.metric_granularity_inference(code=code, name=name, delay=delay, genus=genus)
+        granularity = self.metric_granularity_inference(
+            code=code, name=name, delay=delay, genus=genus
+        )
         return self.metric_name_strict(granularity=granularity, metric=metric)
 
     @staticmethod
-    def metric_granularity_inference(code=None, name=None, delay=None, genus=None, write_key=None):
+    def metric_granularity_inference(
+            code=None,
+            name=None,
+            delay=None,
+            genus=None,
+            write_key=None
+    ):
         if genus is not None:
             return MetricGranularity.code_and_genus
         elif write_key is not None:

@@ -5,7 +5,7 @@ from microconventions.sep_conventions import SepConventions
 
 class DonationHabits(ObscurityHabits):
 
-    def __init__(self,**kwargs):
+    def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self._DONORS = "donors"
 
@@ -29,4 +29,3 @@ class DonationHabits(ObscurityHabits):
 
     def donation_password(self):
         return KeyConventions.shash(self.obscurity())
-

@@ -1,6 +1,8 @@
 from predictionserver.clientmixins.basereader import BaseReader
 from predictionserver.futureconventions.keyconventions import KeyConventions
-from predictionserver.futureconventions.memoconventions import MemoConventions, MemoCategory
+from predictionserver.futureconventions.memoconventions import (
+    MemoConventions, MemoCategory
+)
 from typing import Union
 
 
@@ -9,7 +11,11 @@ class MemoReader(BaseReader, MemoConventions, KeyConventions):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-    def get_memos(self, category:Union[MemoCategory,str], write_key:str=None) -> [dict]:
+    def get_memos(
+            self,
+            category: Union[MemoCategory, str],
+            write_key: str = None,
+    ) -> [dict]:
         """ Backward compatible memo retrieval
              Supply write_key, typically, unless
         """
@@ -17,19 +23,29 @@ class MemoReader(BaseReader, MemoConventions, KeyConventions):
         old_memos = self.get_memos_old(category, write_key=write_key)
         return (new_memos or []) + (old_memos or [])
 
-    def get_memos_new(self, category:Union[MemoCategory,str], throw=True, write_key=None):
+    def get_memos_new(
+            self,
+            category: Union[MemoCategory, str],
+            throw=True,
+            write_key=None,
+    ):
         category = MemoCategory[str(category)]
-        data = {'write_key':write_key} if write_key else None
-        return self.request_get_json(method='memos', arg=str(category), data=data, throw=throw)
+        data = {'write_key': write_key} if write_key else None
+        return self.request_get_json(
+            method='memos',
+            arg=str(category),
+            data=data,
+            throw=throw,
+        )
 
     # --------------------------- #
     #   Backward compatibility    #
     # --------------------------- #
 
-    def get_memos_old(self, category:MemoCategory, write_key:str):
-        method = str(category)+'s'
-        if method in ['errors','warnings','confirms','transactions']:
-            return self.request_get_json(method=method,arg=write_key)
+    def get_memos_old(self, category: MemoCategory, write_key: str):
+        method = str(category) + 's'
+        if method in ['errors', 'warnings', 'confirms', 'transactions']:
+            return self.request_get_json(method=method, arg=write_key)
         elif method in ['announcements']:
             return self.request_get_json(method=method)
         else:
@@ -64,4 +80,3 @@ if __name__ == '__main__':
     client = MemoReader()
     print(client.get_memos(category=MemoCategory.confirm, write_key=ALBAHACA_MOLE))
     print(client.get_memos(category=MemoCategory.announcement, write_key=ALBAHACA_MOLE))
-

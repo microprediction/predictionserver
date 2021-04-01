@@ -16,25 +16,31 @@ class PromiseDaemon(MemoServer, OwnershipServer):
         # Find recent promise queues that exist
         exists_pipe = self.client.pipeline()
         utc_epoch_now = int(time.time())
-        candidates = [self._promise_queue_name(epoch_seconds=utc_epoch_now - seconds) for seconds in
-                      range(self._DELAY_GRACE, -1, -1)]
+        candidates = [
+            self._promise_queue_name(
+                epoch_seconds=utc_epoch_now - seconds
+            ) for seconds in range(self._DELAY_GRACE, -1, -1)
+        ]
         for candidate in candidates:
             exists_pipe.stream_exists(candidate)
         exists = exists_pipe.execute()
 
         # If they exist get the members
         get_pipe = self.client.pipeline()
-        promise_collection_names = [promise for promise, exist in zip(candidates, exists) if exists]
+        promise_collection_names = [
+            promise for promise, exist in zip(candidates, exists) if exists
+        ]
         for collection_name in promise_collection_names:
             get_pipe.smembers(collection_name)
         collections = get_pipe.execute()
-        self.client.delete(
-            *promise_collection_names)  # Immediately delete task list so it isn't done twice ... not that that would
+        # Immediately delete task list so it isn't done twice ... not that that would
+        self.client.delete(*promise_collection_names)
         # be the end of the world
         individual_promises = list(itertools.chain(*collections))
 
         # Sort through promises in reverse time precedence
-        # In particular, we allow more recent copy instructions to override less recent ones
+        # In particular, we allow more recent copy instructions to override less
+        # recent ones
         dest_source = dict()
         dest_method = dict()
         for promise in individual_promises:
@@ -53,7 +59,8 @@ class PromiseDaemon(MemoServer, OwnershipServer):
         destinations = list(dest_source.keys())
         methods = list(dest_method.values())
 
-        # Interpret the promises as source / destination references and get the source values
+        # Interpret the promises as source / destination references and get the
+        # source values
         retrieve_pipe = self.client.pipeline()
         for source, destination, method in zip(sources, destinations, methods):
             if method == 'copy':
@@ -76,23 +83,35 @@ class PromiseDaemon(MemoServer, OwnershipServer):
                 else:
                     delay_ttl = int(max(self.DELAYS) + self._DELAY_GRACE + 5 * 60)
                     move_pipe.set(name=destination, value=value, ex=delay_ttl)
-                    execution_report.append({"operation": "set", "destination": destination, "value": value})
+                    execution_report.append(
+                        {"operation": "set", "destination": destination, "value": value}
+                    )
                     report[destination] = str(value)
             elif method == 'predict':
                 if len(value):
                     value_as_dict = dict(value)
                     move_pipe.zadd(name=destination, mapping=value_as_dict, ch=True)
                     execution_report.append(
-                        {"operation": "zadd", "destination": destination, "len": len(value_as_dict)})
+                        {
+                            "operation": "zadd",
+                            "destination": destination,
+                            "len": len(value_as_dict)
+                        }
+                    )
                     report[destination] = str(len(value_as_dict))
-                    owners = [self._scenario_owner(ticket) for ticket in value_as_dict.keys()]
+                    owners = [self._scenario_owner(ticket)
+                              for ticket in value_as_dict.keys()]
                     unique_owners = list(set(owners))
                     try:
                         move_pipe.sadd(self._OWNERS() + destination, *unique_owners)
-                        execution_report.append(
-                            {"operation": "sadd", "destination": self._OWNERS() + destination, "value": unique_owners})
+                        execution_report.append({
+                            "operation": "sadd",
+                            "destination": self._OWNERS() + destination,
+                            "value": unique_owners
+                        })
                     except DataError:
-                        report[destination] = "Failed to insert predictions to " + destination
+                        report[destination] = "Failed to insert predictions to " + \
+                                              destination
             else:
                 raise Exception("bug - missing case ")
 

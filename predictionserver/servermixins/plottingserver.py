@@ -24,8 +24,10 @@ class PlottingServer(PlottingHabits):
         """
         try:
             lagged_values, lagged_times = self.get_lagged_values_and_times(name=name)
-            lagged_dt = [datetime.datetime.fromtimestamp(t).strftime('%c') for t in lagged_times]
-            df = pd.DataFrame({'t': reversed(lagged_dt), 'v': reversed(lagged_values)})  # creating a sample dataframe
+            lagged_dt = [datetime.datetime.fromtimestamp(
+                t).strftime('%c') for t in lagged_times]
+            # creating a sample dataframe
+            df = pd.DataFrame({'t': reversed(lagged_dt), 'v': reversed(lagged_values)})
             data = [
                 go.Bar(
                     x=df['t'],
@@ -33,7 +35,7 @@ class PlottingServer(PlottingHabits):
                 )
             ]
             graphJSON = json.dumps(data, cls=plotly.utils.PlotlyJSONEncoder)
-        except:
+        except BaseException:
             df = pd.DataFrame({'t': [], 'v': []})  # creating a sample dataframe
             data = [
                 go.Bar(
@@ -47,14 +49,15 @@ class PlottingServer(PlottingHabits):
     def cdf_bar(self, name, delay=None):
         try:
             cdf = self.get_cdf(name=name, delay=int(delay))
-            df = pd.DataFrame({'x': cdf['x'], 'y': cdf['y']})  # creating a sample dataframe
+            # creating a sample dataframe
+            df = pd.DataFrame({'x': cdf['x'], 'y': cdf['y']})
             data = [
                 go.scatter.Line(
                     x=df['x'],
                     y=df['y']
                 )]
             graphJSON = json.dumps(data, cls=plotly.utils.PlotlyJSONEncoder)
-        except:
+        except BaseException:
             # hardcoded dummy values
             df = pd.DataFrame({'x': [], 'y': []})  # creating a sample dataframe
             data = [
@@ -66,13 +69,12 @@ class PlottingServer(PlottingHabits):
         return graphJSON
 
 
-class StandalonePlottingServer(PlottingServer,LaggedServer,BaseServer):
+class StandalonePlottingServer(PlottingServer, LaggedServer, BaseServer):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
 
-if __name__=='__main__':
-    from predictionserver.collider_config_private import REDIZ_COLLIDER_CONFIG, FLATHAT_STOAT
+if __name__ == '__main__':
+    from predictionserver.collider_config_private import REDIZ_COLLIDER_CONFIG
     server = StandalonePlottingServer(**REDIZ_COLLIDER_CONFIG)
-

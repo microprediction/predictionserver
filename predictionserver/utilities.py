@@ -15,7 +15,7 @@ def get_json_safe(thing, getter):
         try:
             json.dumps(data)
             return shorten(data)
-        except:
+        except Exception:
             return None
 
 
@@ -27,11 +27,11 @@ def has_nan(obj):
     else:
         try:
             return np.isnan(obj)
-        except:
+        except Exception:
             return False
 
 
-def shorten(obj,num=5):
+def shorten(obj, num=5):
     if isinstance(obj, list):
         return obj[:num]
     elif isinstance(obj, dict):

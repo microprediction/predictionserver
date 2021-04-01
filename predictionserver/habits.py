@@ -16,15 +16,18 @@ from predictionserver.serverhabits.hashhabits import HashHabits
 from predictionserver.serverhabits.sortedsethabits import SortedSetHabits
 
 
-class Habits(PlottingHabits, LaggedHabits, HorizonHabits, ScenarioHabits, StatsHabits, NamingHabits,
-             AttributeHabits, MetricHabits, HashHabits, SortedSetHabits,
-             MemoHabits, BalanceHabits, OwnershipHabits, KeyHabits, AutoConfigure, ZCurveConventions):
+class Habits(
+    PlottingHabits, LaggedHabits, HorizonHabits, ScenarioHabits, StatsHabits,
+    NamingHabits, AttributeHabits, MetricHabits, HashHabits, SortedSetHabits,
+    MemoHabits, BalanceHabits, OwnershipHabits, KeyHabits, AutoConfigure,
+    ZCurveConventions
+):
 
-    def __init__(self,**kwargs):
+    def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     habits = Habits()
     print(habits.BALANCE)
-    print(habits._OWNERS()) # <--- will fail
+    print(habits._OWNERS())  # <--- will fail
